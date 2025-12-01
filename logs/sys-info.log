@@ -1,0 +1,53 @@
+2025-12-02 00:11:15 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-12-02 00:11:16 [main] INFO  org.ruoyi.RuoYiAIApplication - Starting RuoYiAIApplication using Java 17.0.17 with PID 38970 (/Users/lihb/WorkSpace/Project/AlpenCode/ruoyi-ai/ruoyi-admin/target/classes started by lihb in /Users/lihb/WorkSpace/Project/AlpenCode)
+2025-12-02 00:11:16 [main] INFO  org.ruoyi.RuoYiAIApplication - The following 1 profile is active: "dev"
+2025-12-02 00:11:19 [main] INFO  io.undertow.servlet - Initializing Spring embedded WebApplicationContext
+2025-12-02 00:11:19 [main] INFO  c.b.d.d.DynamicRoutingDataSource - dynamic-datasource detect P6SPY plugin and enabled it
+2025-12-02 00:11:19 [main] INFO  com.zaxxer.hikari.HikariDataSource - master - Starting...
+2025-12-02 00:14:07 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-12-02 00:14:07 [main] INFO  org.ruoyi.RuoYiAIApplication - Starting RuoYiAIApplication using Java 17.0.17 with PID 39483 (/Users/lihb/WorkSpace/Project/AlpenCode/ruoyi-ai/ruoyi-admin/target/classes started by lihb in /Users/lihb/WorkSpace/Project/AlpenCode)
+2025-12-02 00:14:07 [main] INFO  org.ruoyi.RuoYiAIApplication - The following 1 profile is active: "dev"
+2025-12-02 00:14:10 [main] INFO  io.undertow.servlet - Initializing Spring embedded WebApplicationContext
+2025-12-02 00:14:10 [main] INFO  c.b.d.d.DynamicRoutingDataSource - dynamic-datasource detect P6SPY plugin and enabled it
+2025-12-02 00:14:10 [main] INFO  com.zaxxer.hikari.HikariDataSource - master - Starting...
+2025-12-02 00:14:11 [main] INFO  com.zaxxer.hikari.pool.HikariPool - master - Added connection com.mysql.cj.jdbc.ConnectionImpl@17e31657
+2025-12-02 00:14:11 [main] INFO  com.zaxxer.hikari.HikariDataSource - master - Start completed.
+2025-12-02 00:14:11 [main] INFO  c.b.d.d.DynamicRoutingDataSource - dynamic-datasource - add a datasource named [master] success
+2025-12-02 00:14:11 [main] INFO  c.b.d.d.DynamicRoutingDataSource - dynamic-datasource initial loaded [1] datasource,primary datasource named [master]
+2025-12-02 00:14:12 [main] INFO  o.ruoyi.workflow.config.BeanConfig - Configuration:create objectMapper
+2025-12-02 00:14:12 [main] INFO  o.r.common.redis.config.RedisConfig - 初始化 redis 配置
+2025-12-02 00:14:12 [main] INFO  org.redisson.Version - Redisson 3.20.1
+2025-12-02 00:14:12 [redisson-netty-2-1] INFO  o.r.c.p.MasterPubSubConnectionPool - 1 connections initialized for 117.78.1.49/117.78.1.49:6379
+2025-12-02 00:14:13 [redisson-netty-2-3] INFO  o.r.c.pool.MasterConnectionPool - 8 connections initialized for 117.78.1.49/117.78.1.49:6379
+2025-12-02 00:14:13 [main] INFO  o.r.c.core.config.ThreadPoolConfig - ====创建定时任务线程池====
+2025-12-02 00:14:14 [main] INFO  o.r.s.s.VectorStoreStrategyFactory - 向量库策略工厂初始化完成，支持的策略: [weaviate, milvus]
+2025-12-02 00:14:14 [main] INFO  o.r.common.json.config.JacksonConfig - 初始化 jackson 配置
+2025-12-02 00:14:15 [main] INFO  o.r.g.factory.GraphLLMServiceFactory - 注册图谱LLM服务: category=deepseek, service=DeepSeekGraphLLMServiceImpl
+2025-12-02 00:14:15 [main] INFO  o.r.g.factory.GraphLLMServiceFactory - 注册图谱LLM服务: category=dify, service=DifyGraphLLMServiceImpl
+2025-12-02 00:14:15 [main] INFO  o.r.g.factory.GraphLLMServiceFactory - 注册图谱LLM服务: category=openai, service=OpenAIGraphLLMServiceImpl
+2025-12-02 00:14:15 [main] INFO  o.r.g.factory.GraphLLMServiceFactory - 注册图谱LLM服务: category=qwen, service=QwenGraphLLMServiceImpl
+2025-12-02 00:14:15 [main] INFO  o.r.g.factory.GraphLLMServiceFactory - 注册图谱LLM服务: category=zhipu, service=ZhipuGraphLLMServiceImpl
+2025-12-02 00:14:15 [main] INFO  o.r.g.factory.GraphLLMServiceFactory - 图谱LLM服务工厂初始化完成，共注册 5 个服务
+2025-12-02 00:14:15 [main] INFO  o.ruoyi.workflow.config.BeanConfig - Configuration:create restTemplate
+2025-12-02 00:14:15 [main] INFO  o.ruoyi.workflow.config.BeanConfig - mainExecutor,processorsNum:10
+2025-12-02 00:14:15 [main] INFO  o.ruoyi.workflow.config.BeanConfig - imagesExecutor corePoolSize:10,maxPoolSize:20
+2025-12-02 00:14:17 [main] INFO  o.n.driver.internal.DriverFactory - Direct driver instance 1327623469 created for server address localhost:7687
+2025-12-02 00:14:17 [main] INFO  io.undertow - starting server: Undertow - 2.3.18.Final
+2025-12-02 00:14:17 [main] INFO  org.xnio - XNIO version 3.8.16.Final
+2025-12-02 00:14:17 [main] INFO  org.xnio.nio - XNIO NIO Implementation Version 3.8.16.Final
+2025-12-02 00:14:17 [main] INFO  org.jboss.threads - JBoss Threads version 3.5.0.Final
+2025-12-02 00:14:17 [main] INFO  org.ruoyi.RuoYiAIApplication - Started RuoYiAIApplication in 10.701 seconds (process running for 11.278)
+2025-12-02 00:14:17 [main] INFO  o.r.c.c.l.WebSocketTopicListener - 初始化WebSocket主题订阅监听器成功
+2025-12-02 00:14:18 [main] INFO  o.r.s.runner.SystemApplicationRunner - 初始化OSS配置成功
+2025-12-02 00:14:18 [main] INFO  o.ruoyi.mcp.config.McpProcessManager - 启动MCP服务器进程: howtocook-mcp
+2025-12-02 00:14:18 [main] INFO  o.ruoyi.mcp.config.McpProcessManager - 成功启动MCP服务器: howtocook-mcp 命令: [npx, -y, howtocook-mcp]
+2025-12-02 00:14:18 [RMI TCP Connection(4)-127.0.0.1] INFO  io.undertow.servlet - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-02 00:16:37 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:16:37 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:16:39 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:25:32 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:25:33 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:25:34 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:25:35 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:25:35 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
+2025-12-02 00:25:36 [XNIO-1 task-2] INFO  o.r.c.w.i.PlusWebInvokeTimeInterceptor - 域名信息：127.0.0.1
