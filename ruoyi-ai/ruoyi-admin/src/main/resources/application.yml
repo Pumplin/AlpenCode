@@ -126,13 +126,6 @@ security:
     - /resource/oss/upload
     # 重置密码
     - /auth/reset/password
-    # 聊天接口
-    - /chat/send
-    # 文件上传
-    - /chat/upload
-    # 代码生成调用
-    - /tool/gen/getByTableName
-    - /tool/gen/batchGenCode
     # 静态资源
     - /*.html
     - /**/*.html
@@ -156,8 +149,6 @@ security:
     # actuator 监控配置
     - /actuator
     - /actuator/**
-    - /workflow/**
-    - /admin/workflow/**
 # 多租户配置
 tenant:
   # 是否开启
@@ -171,9 +162,6 @@ tenant:
     - sys_role_menu
     - sys_user_post
     - sys_user_role
-
-knowledge-role:
-  enable: false
 
 # MyBatisPlus配置
 # https://baomidou.com/config/
@@ -308,15 +296,6 @@ management:
     neo4j:
       enabled: false
 
-# websocket
-# websocket
-websocket:
-  enabled: true
-  # 路径
-  path: '/resource/websocket'
-  # 设置访问源地址
-  allowedOrigins: '*'
-
 spring:
   ai:
     openai:
@@ -333,72 +312,3 @@ spring:
         stdio:
           servers-configuration: classpath:mcp-server.json
         request-timeout: 300s
-
-# 向量库配置
-vector-store:
-  # 向量存储类型 可选(weaviate/milvus)
-  # 如需修改向量库类型，请修改此配置值!
-  type: weaviate
-
-  # Weaviate配置
-  weaviate:
-    protocol: http
-    host: 127.0.0.1:6038
-    classname: LocalKnowledge
-  # Milvus配置
-  milvus:
-    url: http://localhost:19530
-    collectionname: LocalKnowledge
-
-
---- # Neo4j 知识图谱配置
-#neo4j:
-#  uri: bolt://117.72.192.162:7687
-#  username: neo4j
-#  password: MySecurePass123!
-#  database: neo4j
-#  max-connection-pool-size: 50
-#  connection-timeout-seconds: 30
-
-# 知识图谱配置
-knowledge:
-  graph:
-    # 是否启用知识图谱功能
-    enabled: false
-    # 图数据库类型: neo4j 或 apache-age
-    database-type: neo4j
-    # 是否自动创建索引
-    auto-create-index: true
-    # 批量处理大小
-    batch-size: 1000
-    # 最大重试次数
-    max-retry-count: 3
-
-    # 实体抽取配置
-    extraction:
-      # 置信度阈值（低于此值的实体将被过滤）
-      confidence-threshold: 0.7
-      # 最大实体数量（每个文档）
-      max-entities-per-doc: 100
-      # 最大关系数量（每个文档）
-      max-relations-per-doc: 200
-      # 文本分片大小（用于长文档）
-      chunk-size: 2000
-      # 分片重叠大小
-      chunk-overlap: 200
-
-    # 查询配置
-    query:
-      # 默认查询限制数量
-      default-limit: 100
-      # 最大查询限制数量
-      max-limit: 1000
-      # 路径查询最大深度
-      max-path-depth: 5
-      # 查询超时时间（秒）
-      timeout-seconds: 30
-      # 是否启用查询缓存
-      cache-enabled: true
-      # 缓存过期时间（分钟）
-      cache-expire-minutes: 60
-

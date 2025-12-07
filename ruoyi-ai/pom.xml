@@ -312,37 +312,7 @@
 
             <dependency>
                 <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-chat</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-knowledge-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-chat-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ruoyi</groupId>
                 <artifactId>ruoyi-system-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-generator</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-graph</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -367,25 +337,6 @@
                 <version>${langchain4j-neo4j.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-aihuman</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-workflow</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.ruoyi</groupId>
-                <artifactId>ruoyi-workflow-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -394,7 +345,6 @@
         <module>ruoyi-modules</module>
         <module>ruoyi-modules-api</module>
         <module>ruoyi-admin</module>
-        <module>ruoyi-extend</module>
     </modules>
 
     <packaging>pom</packaging>

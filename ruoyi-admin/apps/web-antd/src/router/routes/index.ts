@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
   fallbackNotFoundRoute,
 ];
 
-/** 基本路由(登录, 第三方登录, 注册等) + workflowIframe路由不需要拦截  */
+/** 基本路由(登录, 第三方登录, 注册等) */
 const basicRoutes = [...coreRoutes];
 /** 基本路由列表，这些路由不需要进入权限拦截 */
 const coreRouteNames = traverseTreeValues(basicRoutes, (route) => route.name);
