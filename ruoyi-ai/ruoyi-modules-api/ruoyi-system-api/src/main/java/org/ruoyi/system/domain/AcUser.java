@@ -45,12 +45,12 @@ public class AcUser implements Serializable {
     private String email;
 
     /**
-     * 状态
+     * 状态（0=正常 1=停用）
      */
     private Integer status;
 
     /**
-     * 逻辑删除（0=存在 1=删除）
+     * 逻辑删除（0=存在 2=删除）
      */
     @TableLogic
     private Integer isDelete;

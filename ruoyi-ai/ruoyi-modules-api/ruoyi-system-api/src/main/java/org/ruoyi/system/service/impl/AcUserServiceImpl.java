@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mysql.cj.x.protobuf.MysqlxExpr;
 import lombok.RequiredArgsConstructor;
 import org.ruoyi.common.core.constant.CommonConstants;
 import org.ruoyi.common.core.exception.ServiceException;

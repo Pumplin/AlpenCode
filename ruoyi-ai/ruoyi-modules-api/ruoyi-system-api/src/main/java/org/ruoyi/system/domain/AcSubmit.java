@@ -80,7 +80,7 @@ public class AcSubmit implements Serializable {
     private Integer totalCount;
 
     /**
-     * 逻辑删除（0=存在 1=删除）
+     * 逻辑删除（0=存在 2=删除）
      */
     @TableLogic
     private Integer isDelete;

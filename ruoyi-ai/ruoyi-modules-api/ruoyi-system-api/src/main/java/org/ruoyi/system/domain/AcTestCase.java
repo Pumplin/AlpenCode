@@ -55,7 +55,7 @@ public class AcTestCase implements Serializable {
     private Integer sort;
 
     /**
-     * 逻辑删除（0=存在 1=删除）
+     * 逻辑删除（0=存在 2=删除）
      */
     @TableLogic
     private Integer isDelete;
@@ -73,7 +73,7 @@ public class AcTestCase implements Serializable {
     private LocalDateTime updatedAt;
 
     /**
-     * 状态
+     * 状态（0=正常 1=停用）
      */
     private Integer status;
 }

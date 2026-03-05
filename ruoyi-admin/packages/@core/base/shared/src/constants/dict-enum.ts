@@ -1,4 +1,5 @@
 export enum DictEnum {
+  AC_DIFFICULTY = 'ac_difficulty', // OJ 题目难度
   PAY_STATE = 'pay_state', // 支付状态
   PROMPT_TEMPLATE_TYPE = 'prompt_template_type', // 任务状态
   SYS_COMMON_STATUS = 'sys_common_status',
