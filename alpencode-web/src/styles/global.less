@@ -1,0 +1,27 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* splitpanes 样式 */
+.splitpanes__splitter {
+  background-color: #e8e8e8;
+  position: relative;
+}
+.splitpanes__splitter:hover {
+  background-color: #1890ff;
+}
+.splitpanes--vertical > .splitpanes__splitter {
+  width: 4px;
+  cursor: col-resize;
+}
+.splitpanes--horizontal > .splitpanes__splitter {
+  height: 4px;
+  cursor: row-resize;
+}

@@ -1,5 +1,8 @@
 export enum DictEnum {
   AC_DIFFICULTY = 'ac_difficulty', // OJ 题目难度
+  AC_SAMPLE_TYPE = 'ac_sample_type', // OJ 是否公开样例
+  AC_JUDGE_RESULT = 'ac_judge_result', // OJ 判题结果
+  AC_LANGUAGE = 'ac_language', // OJ 编程语言
   PAY_STATE = 'pay_state', // 支付状态
   PROMPT_TEMPLATE_TYPE = 'prompt_template_type', // 任务状态
   SYS_COMMON_STATUS = 'sys_common_status',
