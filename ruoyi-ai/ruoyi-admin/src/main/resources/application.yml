@@ -126,6 +126,13 @@ security:
     - /resource/oss/upload
     # 重置密码
     - /auth/reset/password
+    # 用户端认证（无需Token）
+    - /ac/auth/login
+    - /ac/auth/register
+    # 用户端公开接口（无需登录）
+    - /ac/problem/page
+    - /ac/problem/info/**
+    - /ac/problem/category/list
     # 静态资源
     - /*.html
     - /**/*.html
@@ -312,3 +319,16 @@ spring:
         stdio:
           servers-configuration: classpath:mcp-server.json
         request-timeout: 300s
+
+--- # LeetCode 爬虫配置
+leetcode:
+  api:
+    # LeetCode GraphQL API 地址
+    url: https://leetcode.cn/graphql/
+    # 请求超时时间（毫秒）
+    timeout: 10000
+  crawler:
+    # 请求延迟时间（毫秒），避免触发频率限制
+    request-delay: 500
+    # 单次爬取最大数量
+    max-limit: 100

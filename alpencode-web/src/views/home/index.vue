@@ -34,10 +34,10 @@ const columns = [
 async function loadData() {
   loading.value = true;
   try {
-    const res = await getProblemList(query.value);
-    const data = res.data as any;
-    problems.value = data?.rows || [];
-    total.value = data?.total || 0;
+    const res = await getProblemList(query.value) as any;
+    // TableDataInfo 格式：{ code, msg, rows, total } — rows/total 在顶层
+    problems.value = res?.rows || [];
+    total.value = res?.total || 0;
   } finally {
     loading.value = false;
   }

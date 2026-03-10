@@ -57,6 +57,9 @@ public class UserActionListener implements SaTokenListener {
             log.info("user doLogin, userId:{}, token:{}", loginId, tokenValue);
         } else if (userType == UserType.APP_USER) {
             // app端 自行根据业务编写
+        } else if (userType == UserType.AC_USER) {
+            // OJ用户端 仅记录日志，不做在线用户追踪
+            log.info("ac_user doLogin, userId:{}, token:{}", loginId, tokenValue);
         }
     }
 

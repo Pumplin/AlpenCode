@@ -3,6 +3,7 @@ package org.ruoyi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -14,6 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(scanBasePackages = {"org.ruoyi", "org.ruoyi.aihuman"})
 @EnableScheduling
 @EnableAsync
+@EnableRetry
 public class RuoYiAIApplication {
 
     public static void main(String[] args) {

@@ -30,7 +30,7 @@ interface FormData {
   difficulty?: number | string;
   timeLimit?: number;
   memoryLimit?: number;
-  status?: string;
+  status?: number | string;
   categoryIds?: number[];
 }
 
@@ -41,7 +41,7 @@ const defaultValues: FormData = {
   difficulty: undefined,
   timeLimit: 1000,
   memoryLimit: 256,
-  status: '0',
+  status: 0,
   categoryIds: [],
 };
 
@@ -142,14 +142,14 @@ async function handleCancel() {
       <div class="grid lg:grid-cols-2 sm:grid-cols-1">
         <FormItem label="难度" v-bind="validateInfos.difficulty">
           <Select
-            :options="getDictOptions(DictEnum.AC_DIFFICULTY)"
+            :options="getDictOptions(DictEnum.AC_DIFFICULTY, true)"
             :placeholder="$t('ui.formRules.selectRequired')"
             v-model:value="formData.difficulty"
           />
         </FormItem>
         <FormItem label="状态">
           <Select
-            :options="getDictOptions(DictEnum.SYS_NORMAL_DISABLE)"
+            :options="getDictOptions(DictEnum.SYS_NORMAL_DISABLE, true)"
             :placeholder="$t('ui.formRules.selectRequired')"
             v-model:value="formData.status"
           />

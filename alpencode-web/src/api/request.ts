@@ -22,10 +22,10 @@ request.interceptors.response.use(
     const res = response.data;
     if (res.code !== undefined && res.code !== 200) {
       message.error(res.msg || '请求失败');
-      // 401 未登录，跳转登录页
+      // 401 未登录，清除本地状态并跳转登录页（不调后端 logout，避免死循环）
       if (res.code === 401) {
         const userStore = useUserStore();
-        userStore.logout();
+        userStore.clearLocal();
         window.location.hash = '#/login';
       }
       return Promise.reject(new Error(res.msg || '请求失败'));

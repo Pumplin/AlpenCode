@@ -9,8 +9,8 @@ const loading = ref(false);
 const form = ref({ username: '', password: '', confirmPassword: '', email: '' });
 
 async function handleRegister() {
-  if (!form.value.username || !form.value.password || !form.value.email) {
-    message.warning('请填写完整信息');
+  if (!form.value.username || !form.value.password) {
+    message.warning('请填写用户名和密码');
     return;
   }
   if (form.value.password !== form.value.confirmPassword) {
@@ -19,7 +19,14 @@ async function handleRegister() {
   }
   loading.value = true;
   try {
-    await register({ username: form.value.username, password: form.value.password, email: form.value.email });
+    const data: { username: string; password: string; email?: string } = {
+      username: form.value.username,
+      password: form.value.password,
+    };
+    if (form.value.email) {
+      data.email = form.value.email;
+    }
+    await register(data);
     message.success('注册成功，请登录');
     router.push('/login');
   } catch { /* error handled by interceptor */ }
@@ -34,7 +41,7 @@ async function handleRegister() {
         <a-form-item label="用户名">
           <a-input v-model:value="form.username" placeholder="请输入用户名" />
         </a-form-item>
-        <a-form-item label="邮箱">
+        <a-form-item label="邮箱（可选）">
           <a-input v-model:value="form.email" placeholder="请输入邮箱" />
         </a-form-item>
         <a-form-item label="密码">

@@ -22,7 +22,12 @@ public enum UserType {
     /**
      * app端
      */
-    APP_USER("app_user");
+    APP_USER("app_user"),
+
+    /**
+     * OJ用户端
+     */
+    AC_USER("ac_user");
 
     private final String userType;
 

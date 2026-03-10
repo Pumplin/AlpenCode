@@ -6,6 +6,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ruoyi.common.core.utils.SpringUtils;
+import org.ruoyi.common.satoken.utils.StpUserUtil;
 import org.ruoyi.common.security.config.properties.SecurityProperties;
 import org.ruoyi.common.security.handler.AllUrlHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -35,7 +36,18 @@ public class SecurityConfig implements WebMvcConfigurer {
         // 注册路由拦截器，自定义验证规则
         registry.addInterceptor(new SaInterceptor(handler -> {
             AllUrlHandler allUrlHandler = SpringUtils.getBean(AllUrlHandler.class);
-            // 登录验证 -- 排除多个路径
+
+            // 用户端路由校验：/ac/** 下的受保护接口使用 StpUserUtil 校验
+            // /oj/** 路径（如 /oj/problem, /oj/user 等）是管理端接口，走 StpUtil
+            SaRouter.match("/ac/**")
+                .notMatch(
+                    "/ac/auth/login", "/ac/auth/register",
+                    "/ac/problem/page", "/ac/problem/info/**", "/ac/problem/category/list"
+                )
+                .check(r -> StpUserUtil.checkLogin())
+                .stop();
+
+            // 管理端登录验证 -- 排除多个路径
             SaRouter
                 // 获取所有的
                 .match(allUrlHandler.getUrls())
@@ -43,13 +55,6 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .check(() -> {
                     // 检查是否登录 是否有token
                     StpUtil.checkLogin();
-
-                    // 有效率影响 用于临时测试
-                    // if (log.isDebugEnabled()) {
-                    //     log.debug("剩余有效时间: {}", StpUtil.getTokenTimeout());
-                    //     log.debug("临时有效时间: {}", StpUtil.getTokenActivityTimeout());
-                    // }
-
                 });
         })).addPathPatterns("/**")
             // 排除不需要拦截的路径

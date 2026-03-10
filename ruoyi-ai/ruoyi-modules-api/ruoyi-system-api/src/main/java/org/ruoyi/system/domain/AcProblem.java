@@ -38,6 +38,15 @@ public class AcProblem implements Serializable {
      * 题目描述
      */
     private String description;
+    /**
+     * 各语言代码模板（JSON）
+     */
+    private String codeSnippets;
+
+    /**
+     * 函数签名元数据（JSON）
+     */
+    private String metaData;
 
     /**
      * 难度（1=简单 2=中等 3=困难）
