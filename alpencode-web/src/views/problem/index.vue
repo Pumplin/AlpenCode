@@ -170,7 +170,7 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); });
                   <!-- Run Code 结果 -->
                   <template v-if="runResults.length">
                     <div v-for="(r, i) in runResults" :key="i" style="margin-bottom: 12px; padding: 8px; border-radius: 4px; background: #2d2d2d">
-                      <a-tag :color="r.passed ? 'green' : 'red'">{{ r.passed ? 'PASS' : 'FAIL' }}</a-tag>
+                      <a-tag :color="r.passed ? 'green' : 'red'">{{ r.passed ? '通过' : '未通过' }}</a-tag>
                       <div v-if="r.errorLog" style="color: #f44; margin-top: 4px; white-space: pre-wrap">{{ r.errorLog }}</div>
                       <div v-else style="margin-top: 4px">
                         <div>输出: <code>{{ r.output }}</code></div>

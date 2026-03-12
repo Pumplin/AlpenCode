@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.ruoyi.system.domain.AcProblem;
 import org.ruoyi.system.domain.AcSubmit;
 import org.ruoyi.system.domain.AcTestCase;
-import org.ruoyi.system.domain.dto.JudgeRequestDTO;
-import org.ruoyi.system.domain.vo.RunCodeResultVO;
 import org.ruoyi.system.judge.config.RabbitMQConfig;
 import org.ruoyi.system.mapper.AcSubmitMapper;
 import org.ruoyi.system.mapper.AcTestCaseMapper;
@@ -18,7 +16,6 @@ import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,57 +76,70 @@ public class JudgeConsumer {
                 .orderByAsc(AcTestCase::getSort)
         );
 
+        if (testCases.isEmpty()) {
+            updateResult(submitId, 6, 0, 0, 0, "该题目没有测试用例");
+            return;
+        }
+
         String driverCode = DriverCodeGenerator.generate(problem.getMetaData(), submit.getLanguage());
+        List<String> inputs = testCases.stream().map(AcTestCase::getInput).toList();
 
-        JudgeRequestDTO dto = new JudgeRequestDTO();
-        dto.setProblemId(submit.getProblemId());
-        dto.setLanguage(submit.getLanguage());
-        dto.setCode(submit.getCode());
+        // 批量执行：一个容器跑完所有用例
+        DockerSandbox.ExecResult batchResult;
+        long start = System.currentTimeMillis();
+        try {
+            batchResult = switch (submit.getLanguage().toLowerCase()) {
+                case "java" -> dockerSandbox.runJavaBatch(submit.getCode(), driverCode, inputs, problem.getTimeLimit());
+                case "python3", "python" -> dockerSandbox.runPythonBatch(submit.getCode(), driverCode, inputs, problem.getTimeLimit());
+                default -> throw new IllegalArgumentException("不支持的语言: " + submit.getLanguage());
+            };
+        } catch (Exception e) {
+            updateResult(submitId, 6, 0, testCases.size(), 0, e.getMessage());
+            return;
+        }
 
+        int totalTimeCost = (int) (System.currentTimeMillis() - start);
+
+        // 容器整体失败（编译错误等）
+        if (!batchResult.success() && batchResult.stdout().isEmpty()) {
+            String err = batchResult.stderr().isEmpty() ? batchResult.stdout() : batchResult.stderr();
+            int errResult;
+            if (err.contains("javac") || err.contains("SyntaxError") || err.contains("error:")) {
+                errResult = 7; // CE
+            } else if (err.contains("Time Limit Exceeded") || err.contains("timeout")) {
+                errResult = 4; // TLE
+            } else {
+                errResult = 6; // RE
+            }
+            updateResult(submitId, errResult, 0, testCases.size(), totalTimeCost / testCases.size(), err);
+            return;
+        }
+
+        // 按 CASE_END 分割输出，逐一对比
+        String[] caseOutputs = batchResult.stdout().split(DriverCodeGenerator.CASE_END, -1);
         int passCount = 0;
-        int totalTimeCost = 0;
         int result = 2; // AC
         String errorLog = null;
 
-        for (AcTestCase tc : testCases) {
-            DockerSandbox.ExecResult execResult;
-            try {
-                execResult = switch (submit.getLanguage().toLowerCase()) {
-                    case "java" -> dockerSandbox.runJava(submit.getCode(), driverCode, tc.getInput(), problem.getTimeLimit());
-                    case "python3", "python" -> dockerSandbox.runPython(submit.getCode(), driverCode, tc.getInput(), problem.getTimeLimit());
-                    default -> throw new IllegalArgumentException("不支持的语言: " + submit.getLanguage());
-                };
-            } catch (Exception e) {
+        for (int i = 0; i < testCases.size(); i++) {
+            AcTestCase tc = testCases.get(i);
+            if (i >= caseOutputs.length) {
+                // 输出段数不够，中途崩了
                 result = 6; // RE
-                errorLog = e.getMessage();
+                errorLog = batchResult.stderr().isEmpty() ? "执行中断" : batchResult.stderr();
                 break;
             }
-
-            totalTimeCost += execResult.timeCostMs();
-
-            if (!execResult.success()) {
-                String err = execResult.stderr().isEmpty() ? execResult.stdout() : execResult.stderr();
-                if (err.contains("Time Limit Exceeded")) {
-                    result = 4; // TLE
-                } else if (err.contains("javac") || err.contains("SyntaxError")) {
-                    result = 7; // CE
-                } else {
-                    result = 6; // RE
-                }
-                errorLog = err;
-                break;
-            }
-
-            if (execResult.stdout().trim().equals(tc.getExpectedOutput().trim())) {
+            String output = caseOutputs[i].trim();
+            if (output.equals(tc.getExpectedOutput().trim())) {
                 passCount++;
             } else {
                 result = 3; // WA
-                errorLog = "期望: " + tc.getExpectedOutput().trim() + "\n实际: " + execResult.stdout().trim();
+                errorLog = "期望: " + tc.getExpectedOutput().trim() + "\n实际: " + output;
                 break;
             }
         }
 
-        int avgTimeCost = testCases.isEmpty() ? 0 : totalTimeCost / testCases.size();
+        int avgTimeCost = totalTimeCost / testCases.size();
         updateResult(submitId, result, passCount, testCases.size(), avgTimeCost, errorLog);
 
         // 如果 AC，更新题目通过次数
@@ -147,6 +157,7 @@ public class JudgeConsumer {
 
         log.info("判题完成，submitId={}, result={}, pass={}/{}", submitId, result, passCount, testCases.size());
     }
+
 
     private void updateResult(Integer submitId, int result, int passCount, int totalCount, int timeCost, String errorLog) {
         AcSubmit update = new AcSubmit();
