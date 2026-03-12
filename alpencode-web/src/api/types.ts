@@ -30,6 +30,8 @@ export interface Problem {
   status: number;
   categories?: ProblemCategory[];
   createdAt: string;
+  /** 各语言代码模板，key=语言名 */
+  codeTemplates?: Record<string, string>;
 }
 
 /** 题目分类 */

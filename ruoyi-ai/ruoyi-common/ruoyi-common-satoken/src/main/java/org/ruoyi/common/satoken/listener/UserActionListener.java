@@ -35,7 +35,14 @@ public class UserActionListener implements SaTokenListener {
      */
     @Override
     public void doLogin(String loginType, Object loginId, String tokenValue, SaLoginModel loginModel) {
-        UserType userType = UserType.getUserType(loginId.toString());
+        // 通过 loginType 判断用户类型（loginType 即 StpLogic 的 type）
+        UserType userType;
+        try {
+            userType = UserType.getUserType(loginType);
+        } catch (Exception e) {
+            log.warn("未知的 loginType: {}, loginId: {}", loginType, loginId);
+            return;
+        }
         if (userType == UserType.SYS_USER) {
             UserAgent userAgent = UserAgentUtil.parse(ServletUtils.getRequest().getHeader("User-Agent"));
             String ip = ServletUtils.getClientIP();

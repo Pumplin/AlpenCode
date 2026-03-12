@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,25 @@ public class AcProblemServiceImpl extends ServiceImpl<AcProblemMapper, AcProblem
         }
         AcProblemVo vo = BeanUtil.toBean(entity, AcProblemVo.class);
         vo.setCategories(getCategoriesByProblemId(id));
+        // 从 code_snippets 提取各语言模板
+        if (entity.getCodeSnippets() != null && !entity.getCodeSnippets().isBlank()) {
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                com.fasterxml.jackson.databind.JsonNode snippets = mapper.readTree(entity.getCodeSnippets());
+                HashMap<String, String> templates = new java.util.HashMap<>();
+                for (com.fasterxml.jackson.databind.JsonNode snippet : snippets) {
+                    String slug = snippet.get("langSlug").asText();
+                    String code = snippet.get("code").asText();
+                    // 只取我们支持的语言，统一 key
+                    if ("java".equals(slug)) templates.put("java", code);
+                    else if ("python3".equals(slug)) templates.put("python", code);
+                    else if ("python".equals(slug)) templates.putIfAbsent("python", code);
+                }
+                vo.setCodeTemplates(templates);
+            } catch (Exception e) {
+                // 解析失败不影响题目加载
+            }
+        }
         return vo;
     }
 

@@ -1,0 +1,161 @@
+package org.ruoyi.system.judge;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.rabbitmq.client.Channel;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.ruoyi.system.domain.AcProblem;
+import org.ruoyi.system.domain.AcSubmit;
+import org.ruoyi.system.domain.AcTestCase;
+import org.ruoyi.system.domain.dto.JudgeRequestDTO;
+import org.ruoyi.system.domain.vo.RunCodeResultVO;
+import org.ruoyi.system.judge.config.RabbitMQConfig;
+import org.ruoyi.system.mapper.AcSubmitMapper;
+import org.ruoyi.system.mapper.AcTestCaseMapper;
+import org.ruoyi.system.service.IAcProblemService;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 判题 MQ 消费者
+ * @author 32846
+ */
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class JudgeConsumer {
+
+    private final AcSubmitMapper submitMapper;
+    private final AcTestCaseMapper testCaseMapper;
+    private final IAcProblemService problemService;
+    private final DockerSandbox dockerSandbox;
+
+    @RabbitListener(queues = RabbitMQConfig.JUDGE_QUEUE)
+    public void onJudgeMessage(Integer submitId, Channel channel,
+                               @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
+        log.info("收到判题任务，submitId={}", submitId);
+        try {
+            doJudge(submitId);
+            channel.basicAck(deliveryTag, false);
+        } catch (Exception e) {
+            log.error("判题异常，submitId={}", submitId, e);
+            try {
+                // 更新为 RE
+                updateResult(submitId, 6, 0, 0, 0, e.getMessage());
+                channel.basicAck(deliveryTag, false);
+            } catch (Exception ex) {
+                log.error("ACK 失败", ex);
+            }
+        }
+    }
+
+    private void doJudge(Integer submitId) {
+        AcSubmit submit = submitMapper.selectById(submitId);
+        if (submit == null) {
+            log.warn("提交记录不存在，submitId={}", submitId);
+            return;
+        }
+
+        // 更新为 JUDGING
+        submit.setResult(1);
+        submitMapper.updateById(submit);
+
+        AcProblem problem = problemService.getById(submit.getProblemId());
+        if (problem == null || problem.getMetaData() == null) {
+            updateResult(submitId, 6, 0, 0, 0, "题目或 metaData 不存在");
+            return;
+        }
+
+        // 取全部测试用例
+        List<AcTestCase> testCases = testCaseMapper.selectList(
+            new LambdaQueryWrapper<AcTestCase>()
+                .eq(AcTestCase::getProblemId, submit.getProblemId())
+                .eq(AcTestCase::getStatus, 0)
+                .orderByAsc(AcTestCase::getSort)
+        );
+
+        String driverCode = DriverCodeGenerator.generate(problem.getMetaData(), submit.getLanguage());
+
+        JudgeRequestDTO dto = new JudgeRequestDTO();
+        dto.setProblemId(submit.getProblemId());
+        dto.setLanguage(submit.getLanguage());
+        dto.setCode(submit.getCode());
+
+        int passCount = 0;
+        int totalTimeCost = 0;
+        int result = 2; // AC
+        String errorLog = null;
+
+        for (AcTestCase tc : testCases) {
+            DockerSandbox.ExecResult execResult;
+            try {
+                execResult = switch (submit.getLanguage().toLowerCase()) {
+                    case "java" -> dockerSandbox.runJava(submit.getCode(), driverCode, tc.getInput(), problem.getTimeLimit());
+                    case "python3", "python" -> dockerSandbox.runPython(submit.getCode(), driverCode, tc.getInput(), problem.getTimeLimit());
+                    default -> throw new IllegalArgumentException("不支持的语言: " + submit.getLanguage());
+                };
+            } catch (Exception e) {
+                result = 6; // RE
+                errorLog = e.getMessage();
+                break;
+            }
+
+            totalTimeCost += execResult.timeCostMs();
+
+            if (!execResult.success()) {
+                String err = execResult.stderr().isEmpty() ? execResult.stdout() : execResult.stderr();
+                if (err.contains("Time Limit Exceeded")) {
+                    result = 4; // TLE
+                } else if (err.contains("javac") || err.contains("SyntaxError")) {
+                    result = 7; // CE
+                } else {
+                    result = 6; // RE
+                }
+                errorLog = err;
+                break;
+            }
+
+            if (execResult.stdout().trim().equals(tc.getExpectedOutput().trim())) {
+                passCount++;
+            } else {
+                result = 3; // WA
+                errorLog = "期望: " + tc.getExpectedOutput().trim() + "\n实际: " + execResult.stdout().trim();
+                break;
+            }
+        }
+
+        int avgTimeCost = testCases.isEmpty() ? 0 : totalTimeCost / testCases.size();
+        updateResult(submitId, result, passCount, testCases.size(), avgTimeCost, errorLog);
+
+        // 如果 AC，更新题目通过次数
+        if (result == 2) {
+            problemService.lambdaUpdate()
+                .eq(AcProblem::getId, submit.getProblemId())
+                .setSql("ac_count = ac_count + 1")
+                .update();
+        }
+        // 更新提交次数
+        problemService.lambdaUpdate()
+            .eq(AcProblem::getId, submit.getProblemId())
+            .setSql("submit_count = submit_count + 1")
+            .update();
+
+        log.info("判题完成，submitId={}, result={}, pass={}/{}", submitId, result, passCount, testCases.size());
+    }
+
+    private void updateResult(Integer submitId, int result, int passCount, int totalCount, int timeCost, String errorLog) {
+        AcSubmit update = new AcSubmit();
+        update.setId(submitId);
+        update.setResult(result);
+        update.setPassCount(passCount);
+        update.setTotalCount(totalCount);
+        update.setTimeCost(timeCost);
+        update.setErrorLog(errorLog);
+        submitMapper.updateById(update);
+    }
+}

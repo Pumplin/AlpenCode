@@ -40,6 +40,26 @@ spring:
   mail:
     username: xx
 
+--- # Docker 沙箱配置
+judge:
+  docker:
+    # 远程 Docker daemon 地址，留空则使用本机 Docker
+    host: tcp://36.137.121.41:2375
+
+--- # RabbitMQ 配置
+spring:
+  rabbitmq:
+    host: 36.137.121.41
+    port: 5672
+    username: rabbitmq
+    password: yangdp
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 1
+
+
 --- # redis 单机配置(单机与集群只能开启一个另一个需要注释掉)
 spring.data:
   redis:

@@ -82,10 +82,8 @@ public class AcAuthServiceImpl implements IAcAuthService {
             throw new ServiceException("密码错误");
         }
 
-        // Sa-Token 登录，将用户名写入 Session
-        // loginId 格式为 "ac_user:userId"，与框架 UserType 枚举匹配
-        String loginId = "ac_user:" + user.getId();
-        StpUserUtil.login(loginId);
+        // Sa-Token 登录，直接传用户 ID（整数），Sa-Token 多账号体系通过 type 隔离
+        StpUserUtil.login(user.getId());
         StpUserUtil.getTokenSession().set("userId", user.getId());
         StpUserUtil.getTokenSession().set("username", user.getUsername());
 
@@ -107,9 +105,7 @@ public class AcAuthServiceImpl implements IAcAuthService {
 
     @Override
     public AcUserVo getLoginUserInfo() {
-        // 获取当前登录用户 ID（loginId 格式为 "ac_user:userId"）
-        String loginId = StpUserUtil.stpLogic.getLoginIdAsString();
-        int userId = Integer.parseInt(loginId.substring(loginId.indexOf(":") + 1));
+        int userId = StpUserUtil.getLoginIdAsInt();
         AcUser user = acUserMapper.selectById(userId);
         return BeanUtil.toBean(user, AcUserVo.class);
     }

@@ -41,7 +41,7 @@ const defaultValues: FormData = {
   difficulty: undefined,
   timeLimit: 1000,
   memoryLimit: 256,
-  status: 0,
+  status: '0',
   categoryIds: [],
 };
 
@@ -100,6 +100,13 @@ const [BasicModal, modalApi] = useVbenModal({
         filterRecord.categoryIds = record.categories.map((c) => c.id);
       }
       formData.value = filterRecord;
+      // 字典 options 的 value 是字符串，需要将数字转为字符串才能匹配
+      if (formData.value.difficulty !== undefined && formData.value.difficulty !== null) {
+        formData.value.difficulty = String(formData.value.difficulty);
+      }
+      if (formData.value.status !== undefined && formData.value.status !== null) {
+        formData.value.status = String(formData.value.status);
+      }
     }
     modalApi.modalLoading(false);
   },
@@ -142,14 +149,14 @@ async function handleCancel() {
       <div class="grid lg:grid-cols-2 sm:grid-cols-1">
         <FormItem label="难度" v-bind="validateInfos.difficulty">
           <Select
-            :options="getDictOptions(DictEnum.AC_DIFFICULTY, true)"
+            :options="getDictOptions(DictEnum.AC_DIFFICULTY)"
             :placeholder="$t('ui.formRules.selectRequired')"
             v-model:value="formData.difficulty"
           />
         </FormItem>
         <FormItem label="状态">
           <Select
-            :options="getDictOptions(DictEnum.SYS_NORMAL_DISABLE, true)"
+            :options="getDictOptions(DictEnum.SYS_NORMAL_DISABLE)"
             :placeholder="$t('ui.formRules.selectRequired')"
             v-model:value="formData.status"
           />

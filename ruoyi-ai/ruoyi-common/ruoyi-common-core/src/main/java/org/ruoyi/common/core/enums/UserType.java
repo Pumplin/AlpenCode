@@ -32,6 +32,10 @@ public enum UserType {
     private final String userType;
 
     public static UserType getUserType(String str) {
+        // Sa-Token 默认 StpUtil 的 loginType 是 "login"，对应管理端 SYS_USER
+        if ("login".equals(str)) {
+            return SYS_USER;
+        }
         for (UserType value : values()) {
             if (StringUtils.contains(str, value.getUserType())) {
                 return value;

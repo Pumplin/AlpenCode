@@ -8,6 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 题目视图对象 ac_problem
@@ -33,4 +34,7 @@ public class AcProblemVo implements Serializable {
 
     /** 关联的分类列表（非数据库字段） */
     private List<AcProblemCategoryVo> categories;
+
+    /** 各语言代码模板，key=语言名，value=模板代码（非数据库字段） */
+    private Map<String, String> codeTemplates;
 }

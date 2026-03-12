@@ -30,20 +30,24 @@ const difficultyMap: Record<number, { text: string; color: string }> = {
   3: { text: '困难', color: 'red' },
 };
 
-const defaultCode: Record<string, string> = {
-  java: `import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // 在这里写你的代码\n    }\n}\n`,
-  python: `# 在这里写你的代码\n`,
+const fallbackCode: Record<string, string> = {
+  java: `class Solution {\n    // 在这里写你的代码\n}\n`,
+  python: `class Solution:\n    # 在这里写你的代码\n    pass\n`,
 };
+
+function getTemplate(lang: string): string {
+  return problem.value?.codeTemplates?.[lang] || fallbackCode[lang] || '';
+}
 
 async function loadProblem() {
   const res = await getProblemDetail(problemId);
   problem.value = res.data || res;
-  code.value = defaultCode[language.value] || '';
+  code.value = getTemplate(language.value);
 }
 
 function onLanguageChange(lang: string) {
   language.value = lang;
-  code.value = defaultCode[lang] || '';
+  code.value = getTemplate(lang);
 }
 
 async function handleRun() {
@@ -64,7 +68,7 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 
 async function handleSubmit() {
   submitting.value = true;
-  submitResult.value = { status: 'PENDING', msg: '提交中...' };
+  submitResult.value = { status: '提交中...', msg: '正在判题，请稍候...' };
   resultTab.value = 'result';
   try {
     const res = await submitCode({ problemId, language: language.value, code: code.value });
@@ -80,9 +84,16 @@ async function handleSubmit() {
             clearInterval(pollTimer!);
             pollTimer = null;
             submitting.value = false;
-            const resultMap: Record<number, string> = { 2: 'AC', 3: 'WA', 4: 'TLE', 5: 'MLE', 6: 'RE', 7: 'CE' };
+            const resultMap: Record<number, { text: string; color: string }> = {
+              2: { text: '通过', color: 'green' },
+              3: { text: '答案错误', color: 'red' },
+              4: { text: '超时', color: 'orange' },
+              5: { text: '超内存', color: 'orange' },
+              6: { text: '运行错误', color: 'red' },
+              7: { text: '编译错误', color: 'red' },
+            };
             submitResult.value = {
-              status: resultMap[data.result] || 'UNKNOWN',
+              status: resultMap[data.result]?.text || '未知',
               msg: `通过 ${data.passCount}/${data.totalCount} 个测试用例 | 耗时 ${data.timeCost}ms | 内存 ${data.memoryCost}MB`,
             };
           }
@@ -170,7 +181,7 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); });
                   <!-- Submit 结果 -->
                   <template v-else-if="submitResult">
                     <div style="padding: 8px">
-                      <a-tag :color="submitResult.status === 'AC' ? 'green' : submitResult.status === 'PENDING' ? 'blue' : 'red'" style="font-size: 16px; padding: 4px 12px">
+                      <a-tag :color="submitResult.status === '通过' ? 'green' : submitResult.status === '提交中...' ? 'blue' : 'red'" style="font-size: 16px; padding: 4px 12px">
                         {{ submitResult.status }}
                       </a-tag>
                       <div style="margin-top: 8px">{{ submitResult.msg }}</div>
