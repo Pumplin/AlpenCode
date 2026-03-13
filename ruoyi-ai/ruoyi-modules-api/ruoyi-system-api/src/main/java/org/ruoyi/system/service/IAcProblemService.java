@@ -21,6 +21,8 @@ public interface IAcProblemService extends IService<AcProblem> {
 
     TableDataInfo<AcProblemVo> queryPageList(AcProblemQueryDTO queryDTO, PageQuery pageQuery);
 
+    TableDataInfo<AcProblemVo> querySimplePageList(AcProblemQueryDTO queryDTO, PageQuery pageQuery);
+
     List<AcProblemVo> queryList(AcProblemQueryDTO queryDTO);
 
     Boolean insertByDTO(AcProblemDTO dto);

@@ -36,6 +36,14 @@ public class AcProblemUserController {
     }
 
     /**
+     * 轻量分页查询（仅 id/title/difficulty/submitCount/acCount）
+     */
+    @GetMapping("/simple")
+    public TableDataInfo<AcProblemVo> simplePage(AcProblemQueryDTO queryDTO, PageQuery pageQuery) {
+        return problemService.querySimplePageList(queryDTO, pageQuery);
+    }
+
+    /**
      * 题目详情
      */
     @GetMapping("/info/{id}")

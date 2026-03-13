@@ -3,7 +3,7 @@ import type { PageParams, PageResult, Submit, R } from './types';
 
 /** 我的提交记录（分页） */
 export function getMySubmissions(params: PageParams & { problemId?: number; result?: number }) {
-  return request.get<any, R<PageResult<Submit>>>('/ac/submit/my', { params });
+  return request.get<any, R<PageResult<Submit>>>('/ac/submit/page', { params });
 }
 
 /** 提交详情 */

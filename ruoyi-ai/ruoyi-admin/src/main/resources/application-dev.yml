@@ -49,7 +49,7 @@ judge:
 --- # RabbitMQ 配置
 spring:
   rabbitmq:
-    host: 
+    host: 8.145.63.127
     port: 5672
     username: rabbitmq
     password: yangdp

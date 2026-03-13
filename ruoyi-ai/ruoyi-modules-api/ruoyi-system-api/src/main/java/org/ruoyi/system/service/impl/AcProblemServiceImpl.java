@@ -100,6 +100,34 @@ public class AcProblemServiceImpl extends ServiceImpl<AcProblemMapper, AcProblem
     }
 
     @Override
+    public TableDataInfo<AcProblemVo> querySimplePageList(AcProblemQueryDTO queryDTO, PageQuery pageQuery) {
+        // 如果按分类筛选，先查出该分类下的题目ID
+        List<Integer> problemIds = null;
+        if (queryDTO.getCategoryId() != null) {
+            List<AcProblemCategoryMap> maps = categoryMapService.list(
+                Wrappers.lambdaQuery(AcProblemCategoryMap.class)
+                    .eq(AcProblemCategoryMap::getCategoryId, queryDTO.getCategoryId()));
+            problemIds = maps.stream().map(AcProblemCategoryMap::getProblemId).collect(Collectors.toList());
+            if (problemIds.isEmpty()) {
+                return TableDataInfo.build(new Page<>());
+            }
+        }
+
+        LambdaQueryWrapper<AcProblem> lqw = buildQueryWrapper(queryDTO);
+        if (problemIds != null) {
+            lqw.in(AcProblem::getId, problemIds);
+        }
+        // 只查轻量字段，不查 description / code_snippets / meta_data
+        lqw.select(AcProblem::getId, AcProblem::getTitle, AcProblem::getDifficulty,
+                   AcProblem::getSubmitCount, AcProblem::getAcCount, AcProblem::getStatus,
+                   AcProblem::getTimeLimit, AcProblem::getMemoryLimit, AcProblem::getCreatedAt);
+        Page<AcProblem> page = this.page(pageQuery.build(), lqw);
+        Page<AcProblemVo> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        voPage.setRecords(BeanUtil.copyToList(page.getRecords(), AcProblemVo.class));
+        return TableDataInfo.build(voPage);
+    }
+
+    @Override
     public List<AcProblemVo> queryList(AcProblemQueryDTO queryDTO) {
         LambdaQueryWrapper<AcProblem> lqw = buildQueryWrapper(queryDTO);
         List<AcProblem> list = this.list(lqw);

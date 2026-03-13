@@ -6,7 +6,7 @@ import 'splitpanes/dist/splitpanes.css';
 import { MdPreview } from 'md-editor-v3';
 import 'md-editor-v3/lib/preview.css';
 
-import { getProblemList, getProblemDetail, getCategoryList } from '@/api/problem';
+import { getProblemSimpleList, getProblemDetail, getCategoryList } from '@/api/problem';
 import { runCode, submitCode, getSubmitResult } from '@/api/judge';
 import { getMySubmissions } from '@/api/submit';
 import { createAiAnalysisStream } from '@/api/ai';
@@ -21,8 +21,9 @@ const userStore = useUserStore();
 const problems = ref<Problem[]>([]);
 const categories = ref<ProblemCategory[]>([]);
 const listLoading = ref(false);
+const listHasMore = ref(true);
 const listQuery = ref({
-  pageNum: 1, pageSize: 100,
+  pageNum: 1, pageSize: 30,
   categoryId: undefined as number | undefined,
   difficulty: undefined as number | undefined,
   title: '',
@@ -45,13 +46,36 @@ const resultMap: Record<number, { text: string; color: string }> = {
   7: { text: 'Compile Error', color: '#f85149' },
 };
 
-async function loadProblems() {
+async function loadProblems(append = false) {
+  if (listLoading.value) return;
   listLoading.value = true;
   try {
-    const res = await getProblemList(listQuery.value) as any;
-    problems.value = res?.rows || [];
+    const res = await getProblemSimpleList(listQuery.value) as any;
+    const rows = res?.rows || res?.data?.rows || [];
+    const total = res?.total || res?.data?.total || 0;
+    if (append) {
+      problems.value = [...problems.value, ...rows];
+    } else {
+      problems.value = rows;
+    }
+    listHasMore.value = problems.value.length < total;
   } finally { listLoading.value = false; }
 }
+
+function resetAndLoadProblems() {
+  listQuery.value.pageNum = 1;
+  listHasMore.value = true;
+  loadProblems(false);
+}
+
+function onProblemListScroll(e: Event) {
+  const el = e.target as HTMLElement;
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50 && listHasMore.value && !listLoading.value) {
+    listQuery.value.pageNum++;
+    loadProblems(true);
+  }
+}
+
 async function loadCategories() {
   try { const res = await getCategoryList(); categories.value = res.data || res || []; } catch {}
 }
@@ -65,11 +89,16 @@ const detailLoading = ref(false);
 watch(selectedProblemId, async (id) => {
   if (!id) { problem.value = null; return; }
   detailLoading.value = true;
+  // 切题时清空所有状态
+  viewingSubmit.value = null; savedCode.value = '';
+  runResults.value = []; submitResult.value = null; aiAnalysis.value = '';
+  bottomTab.value = 'result';
+  submissions.value = [];
   try {
     const res = await getProblemDetail(id);
     problem.value = res.data || res;
     code.value = getTemplate(language.value);
-    runResults.value = []; submitResult.value = null; aiAnalysis.value = '';
+    loadSubmissions(); // 异步加载当前题目的提交记录
   } finally { detailLoading.value = false; }
 });
 
@@ -136,24 +165,48 @@ async function handleSubmit() {
           const info = resultMap[data.result] || { text: 'Unknown', color: '#8b949e' };
           submitResult.value = { status: info.text, msg: `${data.passCount}/${data.totalCount} passed | ${data.timeCost}ms | ${data.memoryCost}MB`, result: data.result };
           startAiAnalysis(submitId);
+          loadSubmissions(); // 判题完成后刷新提交记录
         }
       } catch {}
     }, 2000);
   } catch (e: any) { submitResult.value = { status: 'Error', msg: e.message, result: -1 }; submitting.value = false; }
 }
 
-// ===== 提交记录 =====
+// ===== 提交记录（按题目维度） =====
 const submissions = ref<Submit[]>([]);
 const submissionsLoading = ref(false);
-const leftTab = ref<'problems' | 'submissions'>('problems');
-watch(leftTab, (tab) => { if (tab === 'submissions') loadSubmissions(); });
+const viewingSubmit = ref<Submit | null>(null); // 正在查看的历史提交
+const savedCode = ref(''); // 查看历史时暂存当前编辑中的代码
+
 async function loadSubmissions() {
+  if (!selectedProblemId.value) { submissions.value = []; return; }
   submissionsLoading.value = true;
   try {
-    const res = await getMySubmissions({ pageNum: 1, pageSize: 50 });
-    const data = res.data as any;
-    submissions.value = data?.rows || [];
+    const res = await getMySubmissions({ pageNum: 1, pageSize: 50, problemId: selectedProblemId.value }) as any;
+    submissions.value = res?.rows || [];
   } finally { submissionsLoading.value = false; }
+}
+
+function viewSubmission(s: Submit) {
+  if (!viewingSubmit.value) savedCode.value = code.value; // 首次查看时暂存
+  viewingSubmit.value = s;
+  code.value = s.code || '';
+  // 展示该次提交的结果
+  runResults.value = [];
+  const info = resultMap[s.result] || { text: 'Unknown', color: '#8b949e' };
+  submitResult.value = {
+    status: info.text,
+    msg: `${s.passCount}/${s.totalCount} passed | ${s.timeCost}ms | ${s.memoryCost}MB`,
+    result: s.result,
+  };
+  bottomTab.value = 'result';
+}
+
+function exitSubmissionView() {
+  code.value = savedCode.value;
+  viewingSubmit.value = null;
+  submitResult.value = null;
+  savedCode.value = '';
 }
 
 // ===== 搜索 =====
@@ -215,64 +268,42 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
         <!-- 左侧：题目列表 / 提交记录 -->
         <Pane :size="18" :min-size="12" :max-size="30">
           <div class="sidebar">
-            <div class="sidebar-tabs">
-              <button :class="['stab', leftTab === 'problems' && 'active']" @click="leftTab = 'problems'">题库</button>
-              <button :class="['stab', leftTab === 'submissions' && 'active']" @click="leftTab = 'submissions'">记录</button>
+            <div class="sidebar-header">
+              <span class="sidebar-title">题库</span>
             </div>
 
             <!-- 题目列表 -->
-            <template v-if="leftTab === 'problems'">
-              <div class="sidebar-search">
-                <input v-model="searchText" class="search-input" placeholder="搜索题目..." />
+            <div class="sidebar-search">
+              <input v-model="searchText" class="search-input" placeholder="搜索题目..." />
+            </div>
+            <div class="sidebar-filters">
+              <select v-model="listQuery.difficulty" class="filter-select" @change="resetAndLoadProblems()">
+                <option :value="undefined">全部难度</option>
+                <option :value="1">简单</option>
+                <option :value="2">中等</option>
+                <option :value="3">困难</option>
+              </select>
+              <select v-model="listQuery.categoryId" class="filter-select" @change="resetAndLoadProblems()">
+                <option :value="undefined">全部分类</option>
+                <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+            <div class="problem-list" v-if="!listLoading || problems.length" @scroll="onProblemListScroll">
+              <div
+                v-for="p in filteredProblems" :key="p.id"
+                :class="['problem-item', selectedProblemId === p.id && 'selected']"
+                @click="selectProblem(p.id)"
+              >
+                <span class="problem-id">{{ p.id }}</span>
+                <span class="problem-title-text">{{ p.title }}</span>
+                <span class="problem-diff" :style="{ color: difficultyMap[p.difficulty]?.color }">
+                  {{ difficultyMap[p.difficulty]?.text }}
+                </span>
               </div>
-              <div class="sidebar-filters">
-                <select v-model="listQuery.difficulty" class="filter-select" @change="loadProblems()">
-                  <option :value="undefined">全部难度</option>
-                  <option :value="1">简单</option>
-                  <option :value="2">中等</option>
-                  <option :value="3">困难</option>
-                </select>
-                <select v-model="listQuery.categoryId" class="filter-select" @change="loadProblems()">
-                  <option :value="undefined">全部分类</option>
-                  <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-                </select>
-              </div>
-              <div class="problem-list" v-if="!listLoading">
-                <div
-                  v-for="p in filteredProblems" :key="p.id"
-                  :class="['problem-item', selectedProblemId === p.id && 'selected']"
-                  @click="selectProblem(p.id)"
-                >
-                  <span class="problem-id">{{ p.id }}</span>
-                  <span class="problem-title-text">{{ p.title }}</span>
-                  <span class="problem-diff" :style="{ color: difficultyMap[p.difficulty]?.color }">
-                    {{ difficultyMap[p.difficulty]?.text }}
-                  </span>
-                </div>
-              </div>
-              <div v-else class="sidebar-loading">加载中...</div>
-            </template>
-
-            <!-- 提交记录 -->
-            <template v-if="leftTab === 'submissions'">
-              <div class="submission-list" v-if="!submissionsLoading">
-                <div v-for="s in submissions" :key="s.id" class="submission-item">
-                  <div class="sub-top">
-                    <span class="sub-problem">{{ s.problemTitle || `#${s.problemId}` }}</span>
-                    <span class="sub-result" :style="{ color: resultMap[s.result]?.color }">
-                      {{ resultMap[s.result]?.text }}
-                    </span>
-                  </div>
-                  <div class="sub-bottom">
-                    <span>{{ s.language }}</span>
-                    <span>{{ s.timeCost }}ms</span>
-                    <span>{{ s.passCount }}/{{ s.totalCount }}</span>
-                  </div>
-                </div>
-                <div v-if="!submissions.length" class="sidebar-empty">暂无提交记录</div>
-              </div>
-              <div v-else class="sidebar-loading">加载中...</div>
-            </template>
+              <div v-if="listLoading" class="sidebar-loading">加载中...</div>
+              <div v-if="!listHasMore && problems.length" class="sidebar-empty">没有更多了</div>
+            </div>
+            <div v-if="listLoading && !problems.length" class="sidebar-loading">加载中...</div>
           </div>
         </Pane>
 
@@ -328,11 +359,19 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
                         {{ submitResult?.result === 2 ? '✨ 优化建议' : '🔍 AI 诊断' }}
                         <span v-if="aiLoading" class="loading-dot">●</span>
                       </button>
+                      <button :class="['rtab', bottomTab === 'history' && 'active']" @click="bottomTab = 'history'">
+                        📋 历史记录
+                      </button>
                       <button class="rtab close-btn" @click="bottomPanelVisible = false" title="关闭面板">✕</button>
                     </div>
                     <div class="result-body">
                       <!-- 运行结果 -->
                       <template v-if="bottomTab === 'result'">
+                        <!-- 查看历史提交时的提示条 -->
+                        <div v-if="viewingSubmit" class="viewing-banner">
+                          <span>正在查看提交 #{{ viewingSubmit.id }} 的代码</span>
+                          <button class="btn-back" @click="exitSubmissionView">恢复编辑</button>
+                        </div>
                         <template v-if="runResults.length">
                           <div v-for="(r, i) in runResults" :key="i" class="run-case">
                             <span class="case-badge" :style="{ background: r.passed ? '#3fb95022' : '#f8514922', color: r.passed ? '#3fb950' : '#f85149' }">
@@ -364,6 +403,38 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
                         </div>
                         <div v-else-if="aiLoading" class="result-empty">AI 正在分析中...</div>
                         <div v-else class="result-empty">提交代码后，AI 将自动分析</div>
+                      </template>
+                      <!-- 历史记录 -->
+                      <template v-if="bottomTab === 'history'">
+                        <template v-if="!selectedProblemId">
+                          <div class="result-empty">请先选择一道题目</div>
+                        </template>
+                        <template v-else-if="submissionsLoading">
+                          <div class="result-empty">加载中...</div>
+                        </template>
+                        <template v-else-if="!submissions.length">
+                          <div class="result-empty">暂无提交记录</div>
+                        </template>
+                        <template v-else>
+                          <div
+                            v-for="s in submissions" :key="s.id"
+                            :class="['history-item', viewingSubmit?.id === s.id && 'active']"
+                            @click="viewSubmission(s)"
+                          >
+                            <div class="history-top">
+                              <span class="history-result" :style="{ color: resultMap[s.result]?.color }">
+                                {{ resultMap[s.result]?.text }}
+                              </span>
+                              <span class="history-lang">{{ s.language === 'java' ? 'Java' : 'Python' }}</span>
+                              <span class="history-time">{{ s.createdAt }}</span>
+                            </div>
+                            <div class="history-bottom">
+                              <span>{{ s.passCount }}/{{ s.totalCount }} passed</span>
+                              <span>{{ s.timeCost }}ms</span>
+                              <span>{{ s.memoryCost }}MB</span>
+                            </div>
+                          </div>
+                        </template>
                       </template>
                     </div>
                   </div>
@@ -442,14 +513,6 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
 
 /* ===== 左侧边栏 ===== */
 .sidebar { height: 100%; background: #0d1117; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; }
-.sidebar-tabs { display: flex; border-bottom: 1px solid #21262d; }
-.stab {
-  flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 500;
-  background: transparent; border: none; color: #8b949e; cursor: pointer;
-  border-bottom: 2px solid transparent; transition: all 0.15s;
-}
-.stab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
-.stab:hover { color: #c9d1d9; }
 
 .sidebar-search { padding: 8px; }
 .search-input {
@@ -477,12 +540,6 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
 .problem-title-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c9d1d9; }
 .problem-diff { font-size: 11px; font-weight: 600; white-space: nowrap; }
 
-.submission-list { flex: 1; overflow-y: auto; }
-.submission-item { padding: 10px 12px; border-bottom: 1px solid #21262d; font-size: 12px; }
-.sub-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.sub-problem { color: #c9d1d9; font-weight: 500; }
-.sub-result { font-weight: 600; }
-.sub-bottom { display: flex; gap: 12px; color: #484f58; }
 .sidebar-loading, .sidebar-empty { padding: 24px; text-align: center; color: #484f58; font-size: 13px; }
 
 /* ===== 题目描述面板 ===== */
@@ -533,4 +590,35 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
 .ai-content { font-size: 14px; line-height: 1.6; }
 .ai-content :deep(.md-editor-preview-wrapper) { padding: 0; }
 .ai-content :deep(pre) { background: #161b22 !important; border-radius: 6px; }
+
+/* ===== 左侧标题栏 ===== */
+.sidebar-header { padding: 10px 12px; border-bottom: 1px solid #21262d; }
+.sidebar-title { font-size: 13px; font-weight: 600; color: #c9d1d9; }
+
+/* ===== 历史记录 ===== */
+.history-item {
+  padding: 10px 12px; border-bottom: 1px solid #21262d; cursor: pointer;
+  transition: background 0.1s; border-left: 3px solid transparent;
+}
+.history-item:hover { background: #161b22; }
+.history-item.active { background: #1f6feb15; border-left-color: #58a6ff; }
+.history-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.history-result { font-weight: 600; font-size: 13px; }
+.history-lang { color: #8b949e; font-size: 12px; }
+.history-time { color: #484f58; font-size: 12px; margin-left: auto; }
+.history-bottom { display: flex; gap: 12px; color: #484f58; font-size: 12px; }
+
+/* ===== 查看历史提示条 ===== */
+.viewing-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; margin-bottom: 8px;
+  background: #1f6feb18; border: 1px solid #1f6feb44; border-radius: 6px;
+  font-size: 13px; color: #58a6ff;
+}
+.btn-back {
+  background: #21262d; color: #c9d1d9; border: 1px solid #30363d;
+  border-radius: 4px; padding: 3px 10px; font-size: 12px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-back:hover { background: #30363d; }
 </style>
