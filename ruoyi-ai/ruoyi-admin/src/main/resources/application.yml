@@ -306,8 +306,11 @@ management:
 spring:
   ai:
     openai:
-      api-key: sk-xx
-      base-url: https://api.pandarobot.chat/
+      api-key: sk-0b9d72248a4f4a968cd5ebeb831dcc0f
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          model: qwen3.5-plus
     mcp:
       client:
         enabled: false

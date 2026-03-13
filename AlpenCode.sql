@@ -94,6 +94,7 @@ CREATE TABLE `ac_submit`  (
   `time_cost` int NULL DEFAULT NULL COMMENT '耗时(ms)',
   `memory_cost` int NULL DEFAULT NULL COMMENT '内存(MB)',
   `error_log` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '错误日志/编译错误信息',
+  `judge_details` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '每个测试用例的详细判题结果(JSON)',
   `pass_count` int NOT NULL DEFAULT 0 COMMENT '通过用例数',
   `total_count` int NOT NULL COMMENT '总用例数',
   `is_delete` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除',

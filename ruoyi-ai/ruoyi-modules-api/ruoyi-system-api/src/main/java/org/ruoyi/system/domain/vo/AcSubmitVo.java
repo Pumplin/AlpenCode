@@ -27,6 +27,8 @@ public class AcSubmitVo implements Serializable {
     private Integer timeCost;
     private Integer memoryCost;
     private String errorLog;
+    /** 每个测试用例的详细判题结果（JSON 数组） */
+    private String judgeDetails;
     private Integer passCount;
     private Integer totalCount;
     private LocalDateTime createdAt;

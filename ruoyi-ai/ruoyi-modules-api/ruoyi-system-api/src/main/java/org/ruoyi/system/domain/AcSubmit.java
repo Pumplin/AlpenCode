@@ -70,6 +70,11 @@ public class AcSubmit implements Serializable {
     private String errorLog;
 
     /**
+     * 每个测试用例的详细判题结果（JSON 数组）
+     */
+    private String judgeDetails;
+
+    /**
      * 通过的测试用例数
      */
     private Integer passCount;

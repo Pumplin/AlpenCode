@@ -66,6 +66,18 @@ export interface Submit {
   createdAt: string;
   /** 关联的题目标题（列表展示用） */
   problemTitle?: string;
+  /** 每个测试用例的详细判题结果（JSON 数组） */
+  judgeDetails?: JudgeCaseDetail[];
+}
+
+/** 单个测试用例的判题详情 */
+export interface JudgeCaseDetail {
+  caseIndex: number;
+  input: string;
+  expectedOutput: string;
+  output: string;
+  passed: boolean;
+  errorLog?: string;
 }
 
 /** 用户 */

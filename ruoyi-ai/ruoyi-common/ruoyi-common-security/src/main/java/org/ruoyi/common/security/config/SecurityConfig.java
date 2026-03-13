@@ -1,5 +1,7 @@
 package org.ruoyi.common.security.config;
 
+import cn.dev33.satoken.context.SaHolder;
+import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
@@ -44,7 +46,20 @@ public class SecurityConfig implements WebMvcConfigurer {
                     "/ac/auth/login", "/ac/auth/register",
                     "/ac/problem/page", "/ac/problem/info/**", "/ac/problem/category/list"
                 )
-                .check(r -> StpUserUtil.checkLogin())
+                .check(r -> {
+                    // SSE 接口（EventSource 不支持自定义 header），token 从 query param 读取
+                    String paramToken = SaHolder.getRequest().getParam("token");
+                    if (paramToken != null && !paramToken.isEmpty()) {
+                        // JWT 简单模式：直接从 token 解析 loginId，为 null 则未登录
+                        Object loginId = StpUserUtil.stpLogic.getLoginIdByToken(paramToken);
+                        if (loginId == null) {
+                            throw NotLoginException.newInstance(StpUserUtil.TYPE,
+                                NotLoginException.INVALID_TOKEN, paramToken);
+                        }
+                    } else {
+                        StpUserUtil.checkLogin();
+                    }
+                })
                 .stop();
 
             // 管理端登录验证 -- 排除多个路径

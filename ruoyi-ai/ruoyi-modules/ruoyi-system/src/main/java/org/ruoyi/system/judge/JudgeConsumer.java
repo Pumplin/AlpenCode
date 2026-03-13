@@ -1,5 +1,6 @@
 package org.ruoyi.system.judge;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,10 @@ import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 判题 MQ 消费者
@@ -115,32 +119,49 @@ public class JudgeConsumer {
             return;
         }
 
-        // 按 CASE_END 分割输出，逐一对比
+        // 按 CASE_END 分割输出，逐一对比，收集每个用例的详细结果
         String[] caseOutputs = batchResult.stdout().split(DriverCodeGenerator.CASE_END, -1);
         int passCount = 0;
         int result = 2; // AC
         String errorLog = null;
+        List<Map<String, Object>> details = new ArrayList<>();
 
         for (int i = 0; i < testCases.size(); i++) {
             AcTestCase tc = testCases.get(i);
+            Map<String, Object> detail = new LinkedHashMap<>();
+            detail.put("caseIndex", i + 1);
+            detail.put("input", tc.getInput());
+            detail.put("expectedOutput", tc.getExpectedOutput().trim());
+
             if (i >= caseOutputs.length) {
                 // 输出段数不够，中途崩了
-                result = 6; // RE
-                errorLog = batchResult.stderr().isEmpty() ? "执行中断" : batchResult.stderr();
-                break;
-            }
-            String output = caseOutputs[i].trim();
-            if (output.equals(tc.getExpectedOutput().trim())) {
-                passCount++;
+                detail.put("output", "");
+                detail.put("passed", false);
+                detail.put("errorLog", batchResult.stderr().isEmpty() ? "执行中断" : batchResult.stderr());
+                if (result == 2) {
+                    result = 6; // RE
+                    errorLog = batchResult.stderr().isEmpty() ? "执行中断" : batchResult.stderr();
+                }
             } else {
-                result = 3; // WA
-                errorLog = "期望: " + tc.getExpectedOutput().trim() + "\n实际: " + output;
-                break;
+                String output = caseOutputs[i].trim();
+                detail.put("output", output);
+                if (output.equals(tc.getExpectedOutput().trim())) {
+                    detail.put("passed", true);
+                    passCount++;
+                } else {
+                    detail.put("passed", false);
+                    detail.put("errorLog", "期望: " + tc.getExpectedOutput().trim() + "\n实际: " + output);
+                    if (result == 2) {
+                        result = 3; // WA
+                        errorLog = "期望: " + tc.getExpectedOutput().trim() + "\n实际: " + output;
+                    }
+                }
             }
+            details.add(detail);
         }
 
         int avgTimeCost = totalTimeCost / testCases.size();
-        updateResult(submitId, result, passCount, testCases.size(), avgTimeCost, errorLog);
+        updateResultWithDetails(submitId, result, passCount, testCases.size(), avgTimeCost, errorLog, JSONUtil.toJsonStr(details));
 
         // 如果 AC，更新题目通过次数
         if (result == 2) {
@@ -167,6 +188,19 @@ public class JudgeConsumer {
         update.setTotalCount(totalCount);
         update.setTimeCost(timeCost);
         update.setErrorLog(errorLog);
+        submitMapper.updateById(update);
+    }
+
+    private void updateResultWithDetails(Integer submitId, int result, int passCount, int totalCount,
+                                          int timeCost, String errorLog, String judgeDetails) {
+        AcSubmit update = new AcSubmit();
+        update.setId(submitId);
+        update.setResult(result);
+        update.setPassCount(passCount);
+        update.setTotalCount(totalCount);
+        update.setTimeCost(timeCost);
+        update.setErrorLog(errorLog);
+        update.setJudgeDetails(judgeDetails);
         submitMapper.updateById(update);
     }
 }

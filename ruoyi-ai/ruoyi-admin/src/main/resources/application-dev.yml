@@ -44,12 +44,12 @@ spring:
 judge:
   docker:
     # 远程 Docker daemon 地址，留空则使用本机 Docker
-    host: tcp://36.137.121.41:2375
+    host: tcp://117.72.81.59:2375
 
 --- # RabbitMQ 配置
 spring:
   rabbitmq:
-    host: 36.137.121.41
+    host: 
     port: 5672
     username: rabbitmq
     password: yangdp

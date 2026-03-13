@@ -6,22 +6,50 @@
 
 html, body, #app {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0d1117;
+  color: #c9d1d9;
 }
 
-/* splitpanes 样式 */
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* splitpanes 深色样式 */
 .splitpanes__splitter {
-  background-color: #e8e8e8;
+  background-color: #21262d;
   position: relative;
 }
 .splitpanes__splitter:hover {
-  background-color: #1890ff;
+  background-color: #1f6feb;
 }
 .splitpanes--vertical > .splitpanes__splitter {
-  width: 4px;
+  width: 3px;
   cursor: col-resize;
 }
 .splitpanes--horizontal > .splitpanes__splitter {
-  height: 4px;
+  height: 3px;
   cursor: row-resize;
+}
+
+/* Ant Design 深色覆盖 */
+.ant-tag {
+  border: none;
+}
+
+/* markdown 深色 */
+.md-editor-dark {
+  --md-bk-color: transparent !important;
 }
