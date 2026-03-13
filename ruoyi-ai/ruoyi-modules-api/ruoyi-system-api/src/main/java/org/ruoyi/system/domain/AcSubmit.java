@@ -73,6 +73,10 @@ public class AcSubmit implements Serializable {
      * 每个测试用例的详细判题结果（JSON 数组）
      */
     private String judgeDetails;
+    /**
+     * AI 分析结果
+     */
+    private String aiAnalysis;
 
     /**
      * 通过的测试用例数

@@ -118,11 +118,24 @@ function onLanguageChange(lang: string) { language.value = lang; code.value = ge
 const running = ref(false);
 const submitting = ref(false);
 const runResults = ref<RunCodeResult[]>([]);
-const submitResult = ref<{ status: string; msg: string; result: number } | null>(null);
+const submitResult = ref<{
+  status: string; msg: string; result: number;
+  errorLog?: string;
+  failedCases?: { caseIndex: number; input: string; expectedOutput: string; output: string }[];
+} | null>(null);
 const bottomPanelVisible = ref(true);
 const bottomTab = ref('result');
 const aiAnalysis = ref('');
 const aiLoading = ref(false);
+const editorFullscreen = ref(false);
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
 let closeAiStream: (() => void) | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -143,7 +156,7 @@ async function handleRun() {
     const res = await runCode({ problemId: problem.value.id, language: language.value, code: code.value });
     runResults.value = res.data || res || [];
   } catch (e: any) {
-    runResults.value = [{ passed: false, output: '', expectedOutput: '', timeCost: 0, memoryCost: 0, errorLog: e.message }];
+    runResults.value = [{ passed: false, input: '', output: '', expectedOutput: '', timeCost: 0, memoryCost: 0, errorLog: e.message }];
   } finally { running.value = false; }
 }
 
@@ -163,7 +176,21 @@ async function handleSubmit() {
         if (data.result !== 0 && data.result !== 1) {
           clearInterval(pollTimer!); pollTimer = null; submitting.value = false;
           const info = resultMap[data.result] || { text: 'Unknown', color: '#8b949e' };
-          submitResult.value = { status: info.text, msg: `${data.passCount}/${data.totalCount} passed | ${data.timeCost}ms | ${data.memoryCost}MB`, result: data.result };
+          // 解析 judgeDetails（后端返回 JSON 字符串）
+          let failedCases: any[] = [];
+          if (data.judgeDetails) {
+            try {
+              const details = typeof data.judgeDetails === 'string' ? JSON.parse(data.judgeDetails) : data.judgeDetails;
+              failedCases = (details || []).filter((d: any) => !d.passed);
+            } catch {}
+          }
+          submitResult.value = {
+            status: info.text,
+            msg: `${data.passCount}/${data.totalCount} passed | ${data.timeCost}ms | ${data.memoryCost}MB`,
+            result: data.result,
+            errorLog: data.errorLog || '',
+            failedCases,
+          };
           startAiAnalysis(submitId);
           loadSubmissions(); // 判题完成后刷新提交记录
         }
@@ -194,11 +221,22 @@ function viewSubmission(s: Submit) {
   // 展示该次提交的结果
   runResults.value = [];
   const info = resultMap[s.result] || { text: 'Unknown', color: '#8b949e' };
+  let failedCases: any[] = [];
+  if (s.judgeDetails) {
+    try {
+      const details = typeof s.judgeDetails === 'string' ? JSON.parse(s.judgeDetails as any) : s.judgeDetails;
+      failedCases = (details || []).filter((d: any) => !d.passed);
+    } catch {}
+  }
   submitResult.value = {
     status: info.text,
     msg: `${s.passCount}/${s.totalCount} passed | ${s.timeCost}ms | ${s.memoryCost}MB`,
     result: s.result,
+    errorLog: s.errorLog || '',
+    failedCases,
   };
+  // 加载该次提交保存的 AI 分析结果
+  aiAnalysis.value = s.aiAnalysis || '';
   bottomTab.value = 'result';
 }
 
@@ -222,7 +260,12 @@ function getAcRate(p: Problem) {
   return ((p.acCount / p.submitCount) * 100).toFixed(0) + '%';
 }
 
-onMounted(() => { loadProblems(); loadCategories(); });
+onMounted(() => {
+  loadProblems(); loadCategories();
+  document.addEventListener('fullscreenchange', () => {
+    editorFullscreen.value = !!document.fullscreenElement;
+  });
+});
 onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStream) closeAiStream(); });
 </script>
 
@@ -240,15 +283,23 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
         <span v-if="problem" class="current-problem-title">{{ problem.title }}</span>
       </div>
       <div class="ide-header-right">
+        <button class="btn btn-ghost btn-icon-only" @click="toggleFullscreen" :title="editorFullscreen ? '退出全屏' : '全屏'">
+          <svg v-if="!editorFullscreen" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+        </button>
         <select class="lang-select" :value="language" @change="onLanguageChange(($event.target as HTMLSelectElement).value)">
           <option value="java">Java</option>
           <option value="python">Python</option>
         </select>
         <button class="btn btn-run" :disabled="!problem || running" @click="handleRun">
-          <span class="btn-icon">▶</span> 运行
+          <span v-if="running" class="btn-spinner"></span>
+          <span v-else class="btn-icon">▶</span>
+          {{ running ? '运行中...' : '运行' }}
         </button>
         <button class="btn btn-submit" :disabled="!problem || submitting" @click="handleSubmit">
-          <span class="btn-icon">⬆</span> 提交
+          <span v-if="submitting" class="btn-spinner"></span>
+          <span v-else class="btn-icon">⬆</span>
+          {{ submitting ? '判题中...' : '提交' }}
         </button>
         <div class="header-divider"></div>
         <template v-if="userStore.isLoggedIn()">
@@ -372,26 +423,78 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
                           <span>正在查看提交 #{{ viewingSubmit.id }} 的代码</span>
                           <button class="btn-back" @click="exitSubmissionView">恢复编辑</button>
                         </div>
+
+                        <!-- Run Code 结果 -->
                         <template v-if="runResults.length">
-                          <div v-for="(r, i) in runResults" :key="i" class="run-case">
-                            <span class="case-badge" :style="{ background: r.passed ? '#3fb95022' : '#f8514922', color: r.passed ? '#3fb950' : '#f85149' }">
-                              {{ r.passed ? '✓ 通过' : '✗ 未通过' }}
-                            </span>
-                            <div v-if="r.errorLog" class="case-error">{{ r.errorLog }}</div>
-                            <div v-else class="case-detail">
-                              <div><span class="label">输出:</span> <code>{{ r.output }}</code></div>
-                              <div><span class="label">期望:</span> <code>{{ r.expectedOutput }}</code></div>
+                          <!-- 有错误日志（CE/RE）：直接展示报错 -->
+                          <template v-if="runResults.some(r => r.errorLog)">
+                            <div class="run-case">
+                              <span class="case-badge" style="background: #f8514922; color: #f85149;">✗ 错误</span>
+                              <div class="case-error">{{ runResults.find(r => r.errorLog)?.errorLog }}</div>
                             </div>
-                          </div>
+                          </template>
+                          <!-- 全部通过 -->
+                          <template v-else-if="runResults.every(r => r.passed)">
+                            <div class="submit-result-box">
+                              <span class="submit-status" style="color: #3fb950;">✓ 全部通过</span>
+                              <span class="submit-msg">{{ runResults.length }} 个样例全部通过</span>
+                            </div>
+                          </template>
+                          <!-- 有未通过的用例 -->
+                          <template v-else>
+                            <div v-for="(r, i) in runResults.filter(r => !r.passed)" :key="i" class="run-case">
+                              <span class="case-badge" style="background: #f8514922; color: #f85149;">✗ 未通过</span>
+                              <div class="case-detail">
+                                <div><span class="label">输入:</span> <code>{{ r.input }}</code></div>
+                                <div><span class="label">期望输出:</span> <code>{{ r.expectedOutput }}</code></div>
+                                <div><span class="label">实际输出:</span> <code>{{ r.output }}</code></div>
+                              </div>
+                            </div>
+                          </template>
                         </template>
+
+                        <!-- Submit 结果 -->
                         <template v-else-if="submitResult">
-                          <div class="submit-result-box">
-                            <span class="submit-status" :style="{ color: submitResult.result === 2 ? '#3fb950' : submitResult.result === -1 ? '#1f6feb' : '#f85149' }">
-                              {{ submitResult.status }}
-                            </span>
-                            <span class="submit-msg">{{ submitResult.msg }}</span>
-                          </div>
+                          <!-- 判题中 -->
+                          <template v-if="submitResult.result === -1 || submitResult.result === 0 || submitResult.result === 1">
+                            <div class="submit-result-box">
+                              <span class="submit-status" style="color: #1f6feb;">{{ submitResult.status }}</span>
+                              <span class="submit-msg">{{ submitResult.msg }}</span>
+                            </div>
+                          </template>
+                          <!-- AC -->
+                          <template v-else-if="submitResult.result === 2">
+                            <div class="submit-result-box">
+                              <span class="submit-status" style="color: #3fb950;">✓ Accepted</span>
+                              <span class="submit-msg">{{ submitResult.msg }}</span>
+                            </div>
+                          </template>
+                          <!-- CE / RE 有 errorLog -->
+                          <template v-else-if="submitResult.errorLog">
+                            <div class="run-case">
+                              <span class="case-badge" style="background: #f8514922; color: #f85149;">{{ submitResult.status }}</span>
+                              <div class="case-error">{{ submitResult.errorLog }}</div>
+                            </div>
+                          </template>
+                          <!-- WA / TLE / MLE 展示失败用例详情 -->
+                          <template v-else>
+                            <div class="submit-result-box" style="margin-bottom: 8px;">
+                              <span class="submit-status" :style="{ color: resultMap[submitResult.result]?.color || '#f85149' }">{{ submitResult.status }}</span>
+                              <span class="submit-msg">{{ submitResult.msg }}</span>
+                            </div>
+                            <template v-if="submitResult.failedCases?.length">
+                              <div v-for="(fc, i) in submitResult.failedCases" :key="i" class="run-case">
+                                <span class="case-badge" style="background: #f8514922; color: #f85149;">用例 #{{ fc.caseIndex + 1 }} 未通过</span>
+                                <div class="case-detail">
+                                  <div><span class="label">输入:</span> <code>{{ fc.input }}</code></div>
+                                  <div><span class="label">期望输出:</span> <code>{{ fc.expectedOutput }}</code></div>
+                                  <div><span class="label">实际输出:</span> <code>{{ fc.output }}</code></div>
+                                </div>
+                              </div>
+                            </template>
+                          </template>
                         </template>
+
                         <template v-else>
                           <div class="result-empty">点击「运行」或「提交」查看结果</div>
                         </template>
@@ -425,6 +528,7 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
                               <span class="history-result" :style="{ color: resultMap[s.result]?.color }">
                                 {{ resultMap[s.result]?.text }}
                               </span>
+                              <span v-if="s.aiAnalysis" class="history-ai-badge" title="有 AI 分析">🤖</span>
                               <span class="history-lang">{{ s.language === 'java' ? 'Java' : 'Python' }}</span>
                               <span class="history-time">{{ s.createdAt }}</span>
                             </div>
@@ -476,6 +580,12 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
   transition: all 0.15s;
 }
 .btn-icon { font-size: 11px; }
+.btn-spinner {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent;
+  animation: spin 0.6s linear infinite; display: inline-block; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .btn-run { background: #21262d; color: #3fb950; border: 1px solid #3fb95044; }
 .btn-run:hover { background: #3fb95018; }
 .btn-run:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -560,6 +670,9 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
 /* ===== 编辑器面板 ===== */
 .editor-panel { height: 100%; background: #0d1117; border-radius: 8px; overflow: hidden; }
 
+.btn-icon-only { padding: 5px 7px; }
+.btn-icon-only svg { display: block; }
+
 /* ===== 结果面板 ===== */
 .result-panel { height: 100%; display: flex; flex-direction: column; background: #0d1117; border-radius: 8px; overflow: hidden; }
 .result-tabs { display: flex; align-items: center; border-bottom: 1px solid #21262d; padding: 0 8px; }
@@ -604,6 +717,7 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
 .history-item.active { background: #1f6feb15; border-left-color: #58a6ff; }
 .history-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .history-result { font-weight: 600; font-size: 13px; }
+.history-ai-badge { font-size: 12px; cursor: default; }
 .history-lang { color: #8b949e; font-size: 12px; }
 .history-time { color: #484f58; font-size: 12px; margin-left: auto; }
 .history-bottom { display: flex; gap: 12px; color: #484f58; font-size: 12px; }

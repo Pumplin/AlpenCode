@@ -52,10 +52,25 @@ public class AcAiAnalysisServiceImpl implements IAcAiAnalysisService {
         String prompt = buildPrompt(submit, problem);
         log.info("AI 分析开始，submitId={}, result={}", submitId, submit.getResult());
 
+        StringBuilder collector = new StringBuilder();
+
         return chatClient.prompt()
             .user(prompt)
             .stream()
-            .content();
+            .content()
+            .doOnNext(collector::append)
+            .doOnComplete(() -> {
+                // 流结束后，将完整 AI 分析结果保存到数据库
+                try {
+                    AcSubmit update = new AcSubmit();
+                    update.setId(submitId);
+                    update.setAiAnalysis(collector.toString());
+                    submitMapper.updateById(update);
+                    log.info("AI 分析结果已保存，submitId={}, length={}", submitId, collector.length());
+                } catch (Exception e) {
+                    log.error("保存 AI 分析结果失败，submitId={}", submitId, e);
+                }
+            });
     }
 
     private String buildPrompt(AcSubmit submit, AcProblem problem) {

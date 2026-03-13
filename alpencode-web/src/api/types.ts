@@ -68,6 +68,8 @@ export interface Submit {
   problemTitle?: string;
   /** 每个测试用例的详细判题结果（JSON 数组） */
   judgeDetails?: JudgeCaseDetail[];
+  /** AI 分析结果 */
+  aiAnalysis?: string;
 }
 
 /** 单个测试用例的判题详情 */
@@ -110,6 +112,7 @@ export interface RunCodeParams {
 /** 代码运行结果 */
 export interface RunCodeResult {
   passed: boolean;
+  input: string;
   output: string;
   expectedOutput: string;
   timeCost: number;
