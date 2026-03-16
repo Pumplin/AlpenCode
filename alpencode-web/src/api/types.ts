@@ -126,3 +126,34 @@ export interface SubmitCodeParams {
   language: string;
   code: string;
 }
+
+/** 分类维度统计 */
+export interface CategoryStat {
+  name: string;
+  count: number;
+}
+
+/** 用户刷题统计数据 */
+export interface AcUserStatsVo {
+  totalSubmissions: number;
+  solvedCount: number;
+  acceptRate: number;
+  easyCount: number;
+  mediumCount: number;
+  hardCount: number;
+  waCount: number;
+  tleCount: number;
+  reCount: number;
+  ceCount: number;
+  daysSinceJoin: number;
+  categoryStats: CategoryStat[];
+}
+
+/** AI 能力报告 */
+export interface AcAiReportVo {
+  id: number;
+  status: number;
+  statsSnapshot: string;
+  reportContent: string;
+  createdAt: string;
+}

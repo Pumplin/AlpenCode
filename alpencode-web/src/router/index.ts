@@ -18,6 +18,16 @@ const router = createRouter({
       name: 'Register',
       component: () => import('@/views/register/index.vue'),
     },
+    {
+      path: '/profile',
+      name: 'Profile',
+      component: () => import('@/views/profile/index.vue'),
+    },
+    {
+      path: '/report',
+      name: 'Report',
+      component: () => import('@/views/report/index.vue'),
+    },
   ],
 });
 

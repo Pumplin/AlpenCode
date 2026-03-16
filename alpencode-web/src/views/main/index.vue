@@ -304,6 +304,7 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
         <div class="header-divider"></div>
         <template v-if="userStore.isLoggedIn()">
           <span class="user-name">{{ userStore.user?.username || '用户' }}</span>
+          <button class="btn btn-ghost" @click="router.push('/profile')">个人中心</button>
           <button class="btn btn-ghost" @click="userStore.logout(); router.push('/login')">退出</button>
         </template>
         <template v-else>

@@ -310,7 +310,7 @@ spring:
       base-url: https://dashscope.aliyuncs.com/compatible-mode
       chat:
         options:
-          model: qwen3.5-plus
+          model: kimi-k2.5
     mcp:
       client:
         enabled: false

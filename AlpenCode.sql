@@ -3304,4 +3304,25 @@ CREATE TABLE `t_workflow_runtime_node`  (
 -- Records of t_workflow_runtime_node
 -- ----------------------------
 
+-- ----------------------------
+-- Table structure for ac_ai_report
+-- ----------------------------
+DROP TABLE IF EXISTS `ac_ai_report`;
+CREATE TABLE `ac_ai_report`  (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '报告ID',
+  `user_id` int NOT NULL COMMENT '用户ID',
+  `status` int NOT NULL DEFAULT 0 COMMENT '状态（0=生成中 1=已完成 2=失败）',
+  `stats_snapshot` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '统计数据快照（JSON）',
+  `report_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT 'AI生成的报告内容（JSON）',
+  `is_delete` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  `created_at` datetime NOT NULL COMMENT '创建时间',
+  `updated_at` datetime NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_user_id` (`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of ac_ai_report
+-- ----------------------------
+
 SET FOREIGN_KEY_CHECKS = 1;
