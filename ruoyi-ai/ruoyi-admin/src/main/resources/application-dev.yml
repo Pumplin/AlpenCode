@@ -49,10 +49,10 @@ judge:
 --- # RabbitMQ 配置
 spring:
   rabbitmq:
-    host: 8.145.63.127
+    host: service.yearark.top
     port: 5672
     username: rabbitmq
-    password: yangdp
+    password: Hb@182327
     virtual-host: /
     listener:
       simple:

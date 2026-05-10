@@ -291,7 +291,7 @@ onUnmounted(() => {
 <style scoped>
 .profile-page {
   min-height: calc(100vh - 64px);
-  background: #0d1117;
+  background: #ffffff;
   padding: 32px 16px;
 }
 
@@ -304,8 +304,10 @@ onUnmounted(() => {
 }
 
 .profile-card {
-  background: #161b22;
+  background: #ffffff;
   border-radius: 12px;
+  border: 1px solid #e1e4e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .profile-card :deep(.ant-card-body) {
@@ -323,7 +325,7 @@ onUnmounted(() => {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #58a6ff, #3fb950);
+  background: linear-gradient(135deg, #1f6feb, #3fb950);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -338,20 +340,20 @@ onUnmounted(() => {
 }
 
 .username {
-  color: #c9d1d9;
+  color: #1f2328;
   font-size: 22px;
   margin: 0 0 4px 0;
   font-weight: 600;
 }
 
 .email {
-  color: #8b949e;
+  color: #57606a;
   margin: 0 0 2px 0;
   font-size: 14px;
 }
 
 .join-info {
-  color: #8b949e;
+  color: #57606a;
   margin: 0;
   font-size: 13px;
 }
@@ -362,18 +364,18 @@ onUnmounted(() => {
 }
 
 .card-actions :deep(.ant-btn) {
-  background: #21262d;
-  border-color: #30363d;
-  color: #c9d1d9;
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #333333;
 }
 
 .card-actions :deep(.ant-btn:hover) {
-  border-color: #58a6ff;
-  color: #58a6ff;
+  border-color: #1f6feb;
+  color: #1f6feb;
 }
 
 .section-title {
-  color: #c9d1d9;
+  color: #1f2328;
   font-size: 18px;
   margin: 0 0 20px 0;
   font-weight: 600;
@@ -388,26 +390,27 @@ onUnmounted(() => {
 .stat-item {
   text-align: center;
   padding: 16px 8px;
-  background: #21262d;
+  background: #f6f8fa;
   border-radius: 8px;
+  border: 1px solid #e1e4e8;
 }
 
 .stat-number {
   font-size: 28px;
   font-weight: 700;
-  color: #58a6ff;
+  color: #1f6feb;
   line-height: 1.2;
 }
 
 .stat-label {
   font-size: 13px;
-  color: #8b949e;
+  color: #57606a;
   margin-top: 6px;
 }
 
 .empty-stats {
   text-align: center;
-  color: #8b949e;
+  color: #57606a;
   padding: 24px 0;
 }
 
@@ -417,7 +420,7 @@ onUnmounted(() => {
 }
 
 .report-desc {
-  color: #8b949e;
+  color: #57606a;
   margin-bottom: 16px;
   font-size: 14px;
 }
@@ -426,22 +429,22 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c9d1d9;
+  color: #333333;
   padding: 16px 0;
   font-size: 15px;
 }
 
 .report-generating :deep(.ant-spin-dot-item) {
-  background-color: #58a6ff;
+  background-color: #1f6feb;
 }
 
-/* Ant Design Vue overrides for dark theme */
+/* Ant Design Vue overrides for light theme */
 .profile-card :deep(.ant-card-loading-content) {
   padding: 0;
 }
 
 .profile-card :deep(.ant-card-loading-block) {
-  background: linear-gradient(90deg, #21262d 25%, #30363d 37%, #21262d 63%);
+  background: linear-gradient(90deg, #f6f8fa 25%, #e1e4e8 37%, #f6f8fa 63%);
 }
 
 @media (max-width: 600px) {

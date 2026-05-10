@@ -48,24 +48,25 @@ async function handleLogin() {
 <style scoped>
 .auth-page {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: #0d1117;
-  background-image: radial-gradient(ellipse at 50% 0%, #1f6feb15 0%, transparent 60%);
+  background: #ffffff;
+  background-image: radial-gradient(ellipse at 50% 0%, #1f6feb08 0%, transparent 60%);
 }
 .auth-card {
-  width: 380px; padding: 40px 36px; background: #161b22;
-  border: 1px solid #30363d; border-radius: 12px;
+  width: 380px; padding: 40px 36px; background: #ffffff;
+  border: 1px solid #d0d7de; border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 .auth-logo { font-size: 28px; text-align: center; margin-bottom: 4px; }
-.logo-text { font-weight: 700; color: #58a6ff; letter-spacing: 1px; }
-.auth-sub { text-align: center; color: #484f58; font-size: 13px; margin-bottom: 28px; }
+.logo-text { font-weight: 700; color: #1f6feb; letter-spacing: 1px; }
+.auth-sub { text-align: center; color: #57606a; font-size: 13px; margin-bottom: 28px; }
 .field { margin-bottom: 18px; }
-.field label { display: block; font-size: 13px; color: #8b949e; margin-bottom: 6px; }
+.field label { display: block; font-size: 13px; color: #57606a; margin-bottom: 6px; }
 .field input {
-  width: 100%; padding: 10px 12px; background: #0d1117; border: 1px solid #30363d;
-  border-radius: 6px; color: #c9d1d9; font-size: 14px; outline: none; transition: border 0.15s;
+  width: 100%; padding: 10px 12px; background: #ffffff; border: 1px solid #d0d7de;
+  border-radius: 6px; color: #333333; font-size: 14px; outline: none; transition: border 0.15s;
 }
-.field input:focus { border-color: #58a6ff; }
-.field input::placeholder { color: #484f58; }
+.field input:focus { border-color: #1f6feb; }
+.field input::placeholder { color: #8c959f; }
 .auth-btn {
   width: 100%; padding: 10px; background: #1f6feb; color: #fff; border: none;
   border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer;
@@ -73,7 +74,7 @@ async function handleLogin() {
 }
 .auth-btn:hover { background: #388bfd; }
 .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.auth-link { text-align: center; margin-top: 20px; font-size: 13px; color: #8b949e; }
-.auth-link a { color: #58a6ff; text-decoration: none; }
+.auth-link { text-align: center; margin-top: 20px; font-size: 13px; color: #57606a; }
+.auth-link a { color: #1f6feb; text-decoration: none; }
 .auth-link a:hover { text-decoration: underline; }
 </style>

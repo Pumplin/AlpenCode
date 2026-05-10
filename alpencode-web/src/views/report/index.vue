@@ -109,15 +109,15 @@ function initRingChart() {
   ringChart = echarts.init(ringChartRef.value);
   const s = stats.value;
   ringChart.setOption({
-    tooltip: { trigger: 'item', backgroundColor: '#1c2128', borderColor: '#30363d', textStyle: { color: '#c9d1d9' }, formatter: '{b}: {c}题 ({d}%)' },
-    legend: { bottom: 0, textStyle: { color: '#8b949e', fontSize: 13 }, itemGap: 20 },
+    tooltip: { trigger: 'item', backgroundColor: '#ffffff', borderColor: '#d0d7de', textStyle: { color: '#333333' }, formatter: '{b}: {c}题 ({d}%)' },
+    legend: { bottom: 0, textStyle: { color: '#57606a', fontSize: 13 }, itemGap: 20 },
     series: [{
       type: 'pie',
       radius: ['42%', '68%'],
       center: ['50%', '44%'],
       avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: '#0d1117', borderWidth: 3 },
-      label: { show: true, position: 'outside', color: '#c9d1d9', fontSize: 13, formatter: '{b}\n{c}题' },
+      itemStyle: { borderRadius: 6, borderColor: '#ffffff', borderWidth: 3 },
+      label: { show: true, position: 'outside', color: '#333333', fontSize: 13, formatter: '{b}\n{c}题' },
       emphasis: { label: { fontSize: 15, fontWeight: 'bold' } },
       data: [
         { value: s.easyCount, name: '简单', itemStyle: { color: '#3fb950' } },
@@ -136,13 +136,13 @@ function initRadarChart() {
   radarChart = echarts.init(radarChartRef.value);
   const maxVal = Math.max(...cats.map(c => c.count), 1);
   radarChart.setOption({
-    tooltip: { backgroundColor: '#1c2128', borderColor: '#30363d', textStyle: { color: '#c9d1d9' } },
+    tooltip: { backgroundColor: '#ffffff', borderColor: '#d0d7de', textStyle: { color: '#333333' } },
     radar: {
       indicator: cats.map(c => ({ name: c.name, max: Math.ceil(maxVal * 1.3) })),
-      axisName: { color: '#8b949e', fontSize: 12 },
-      splitArea: { areaStyle: { color: ['rgba(88,166,255,0.03)', 'rgba(88,166,255,0.06)'] } },
-      splitLine: { lineStyle: { color: '#21262d' } },
-      axisLine: { lineStyle: { color: '#30363d' } },
+      axisName: { color: '#57606a', fontSize: 12 },
+      splitArea: { areaStyle: { color: ['rgba(31,111,235,0.03)', 'rgba(31,111,235,0.06)'] } },
+      splitLine: { lineStyle: { color: '#e1e4e8' } },
+      axisLine: { lineStyle: { color: '#d0d7de' } },
       shape: 'polygon',
     },
     series: [{
@@ -150,9 +150,9 @@ function initRadarChart() {
       data: [{
         value: cats.map(c => c.count),
         name: '通过题数',
-        areaStyle: { color: 'rgba(88,166,255,0.12)' },
-        lineStyle: { color: '#58a6ff', width: 2 },
-        itemStyle: { color: '#58a6ff', borderColor: '#58a6ff', borderWidth: 2 },
+        areaStyle: { color: 'rgba(31,111,235,0.12)' },
+        lineStyle: { color: '#1f6feb', width: 2 },
+        itemStyle: { color: '#1f6feb', borderColor: '#1f6feb', borderWidth: 2 },
         symbol: 'circle',
         symbolSize: 6,
       }],
@@ -167,20 +167,20 @@ function initPieChart() {
     { value: s.waCount, name: 'Wrong Answer', itemStyle: { color: '#f85149' } },
     { value: s.tleCount, name: 'Time Limit', itemStyle: { color: '#d29922' } },
     { value: s.reCount, name: 'Runtime Error', itemStyle: { color: '#da3633' } },
-    { value: s.ceCount, name: 'Compile Error', itemStyle: { color: '#8b949e' } },
+    { value: s.ceCount, name: 'Compile Error', itemStyle: { color: '#8c959f' } },
   ].filter(d => d.value > 0);
   if (errorData.length === 0) return;
   pieChart?.dispose();
   pieChart = echarts.init(pieChartRef.value);
   pieChart.setOption({
-    tooltip: { trigger: 'item', backgroundColor: '#1c2128', borderColor: '#30363d', textStyle: { color: '#c9d1d9' }, formatter: '{b}: {c}次 ({d}%)' },
-    legend: { bottom: 0, textStyle: { color: '#8b949e', fontSize: 12 }, itemGap: 16 },
+    tooltip: { trigger: 'item', backgroundColor: '#ffffff', borderColor: '#d0d7de', textStyle: { color: '#333333' }, formatter: '{b}: {c}次 ({d}%)' },
+    legend: { bottom: 0, textStyle: { color: '#57606a', fontSize: 12 }, itemGap: 16 },
     series: [{
       type: 'pie',
       radius: ['35%', '62%'],
       center: ['50%', '44%'],
-      itemStyle: { borderRadius: 5, borderColor: '#0d1117', borderWidth: 3 },
-      label: { color: '#c9d1d9', fontSize: 12, formatter: '{b}\n{d}%' },
+      itemStyle: { borderRadius: 5, borderColor: '#ffffff', borderWidth: 3 },
+      label: { color: '#333333', fontSize: 12, formatter: '{b}\n{d}%' },
       emphasis: { label: { fontSize: 14, fontWeight: 'bold' } },
       data: errorData,
     }],
@@ -255,14 +255,14 @@ onUnmounted(() => {
         <!-- 能力分数环 -->
         <div class="score-ring-wrap">
           <svg class="score-ring" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="50" fill="none" stroke="#21262d" stroke-width="8"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#e1e4e8" stroke-width="8"/>
             <circle cx="60" cy="60" r="50" fill="none" :stroke="abilityLevelColor" stroke-width="8"
               stroke-linecap="round"
               :stroke-dasharray="`${(report.abilityScore / 100) * 314} 314`"
               stroke-dashoffset="78.5"
               style="transition: stroke-dasharray 1.5s ease"/>
-            <text x="60" y="55" text-anchor="middle" fill="#e6edf3" font-size="26" font-weight="700">{{ report.abilityScore }}</text>
-            <text x="60" y="74" text-anchor="middle" fill="#8b949e" font-size="11">综合评分</text>
+            <text x="60" y="55" text-anchor="middle" fill="#1f2328" font-size="26" font-weight="700">{{ report.abilityScore }}</text>
+            <text x="60" y="74" text-anchor="middle" fill="#57606a" font-size="11">综合评分</text>
           </svg>
         </div>
 
@@ -474,29 +474,30 @@ onUnmounted(() => {
 /* ===== Loading ===== */
 .report-loading {
   height: 100vh; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; background: #0d1117; color: #8b949e; font-size: 16px; gap: 16px;
+  justify-content: center; background: #ffffff; color: #57606a; font-size: 16px; gap: 16px;
 }
 .loading-spinner {
   width: 32px; height: 32px; border-radius: 50%;
-  border: 3px solid #21262d; border-top-color: #58a6ff;
+  border: 3px solid #e1e4e8; border-top-color: #1f6feb;
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ===== Scroll Container ===== */
 .report-scroll-container {
-  height: 100vh; overflow-y: auto; scroll-snap-type: y mandatory; background: #0d1117;
+  height: 100vh; overflow-y: auto; scroll-snap-type: y mandatory; background: #ffffff;
 }
 
 /* ===== Back Button ===== */
 .back-btn {
   position: fixed; top: 20px; left: 20px; z-index: 100;
   display: flex; align-items: center; gap: 6px;
-  background: rgba(22, 27, 34, 0.9); backdrop-filter: blur(8px);
-  border: 1px solid #30363d; border-radius: 8px; color: #8b949e;
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
+  border: 1px solid #d0d7de; border-radius: 8px; color: #57606a;
   padding: 7px 14px; font-size: 13px; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-.back-btn:hover { color: #58a6ff; border-color: #58a6ff; }
+.back-btn:hover { color: #1f6feb; border-color: #1f6feb; }
 
 /* ===== Section ===== */
 .report-section {
@@ -512,17 +513,17 @@ onUnmounted(() => {
 .section-inner.wide { max-width: 900px; }
 
 .section-badge {
-  display: inline-block; background: rgba(88,166,255,0.1); color: #58a6ff;
+  display: inline-block; background: rgba(31,111,235,0.1); color: #1f6feb;
   padding: 5px 16px; border-radius: 20px; font-size: 13px; margin-bottom: 16px;
 }
-.section-title { color: #e6edf3; font-size: 26px; font-weight: 700; margin: 0 0 20px; }
-.section-comment { color: #8b949e; font-size: 14px; line-height: 1.8; margin-top: 16px; text-align: left; }
+.section-title { color: #1f2328; font-size: 26px; font-weight: 700; margin: 0 0 20px; }
+.section-comment { color: #57606a; font-size: 14px; line-height: 1.8; margin-top: 16px; text-align: left; }
 
 /* ===== Overview ===== */
-.overview-title { color: #e6edf3; font-size: 32px; font-weight: 700; margin: 0 0 12px; }
+.overview-title { color: #1f2328; font-size: 32px; font-weight: 700; margin: 0 0 12px; }
 .personality-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
 .personality-tag {
-  background: linear-gradient(135deg, #58a6ff, #3fb950);
+  background: linear-gradient(135deg, #1f6feb, #3fb950);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   font-size: 20px; font-weight: 700;
 }
@@ -536,16 +537,16 @@ onUnmounted(() => {
 
 .overview-stats { display: flex; justify-content: center; gap: 28px; margin-bottom: 20px; flex-wrap: wrap; }
 .overview-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.overview-number { font-size: 32px; font-weight: 700; color: #58a6ff; line-height: 1.1; }
+.overview-number { font-size: 32px; font-weight: 700; color: #1f6feb; line-height: 1.1; }
 .overview-number.accent-green { color: #3fb950; }
-.overview-label { font-size: 12px; color: #8b949e; }
+.overview-label { font-size: 12px; color: #57606a; }
 
 .highlights-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 16px; }
 .highlight-badge {
-  background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2);
-  color: #58a6ff; padding: 4px 12px; border-radius: 20px; font-size: 12px;
+  background: rgba(31,111,235,0.08); border: 1px solid rgba(31,111,235,0.2);
+  color: #1f6feb; padding: 4px 12px; border-radius: 20px; font-size: 12px;
 }
-.overview-text { color: #8b949e; font-size: 14px; line-height: 1.8; max-width: 560px; margin: 0 auto; }
+.overview-text { color: #57606a; font-size: 14px; line-height: 1.8; max-width: 560px; margin: 0 auto; }
 
 /* ===== Difficulty Layout ===== */
 .difficulty-layout { display: flex; gap: 24px; align-items: flex-start; }
@@ -555,9 +556,9 @@ onUnmounted(() => {
 .diff-item { display: flex; flex-direction: column; gap: 6px; }
 .diff-header { display: flex; align-items: center; gap: 8px; }
 .diff-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.diff-name { color: #c9d1d9; font-size: 14px; flex: 1; }
-.diff-count { color: #8b949e; font-size: 13px; }
-.diff-bar-bg { height: 6px; background: #21262d; border-radius: 3px; overflow: hidden; }
+.diff-name { color: #333333; font-size: 14px; flex: 1; }
+.diff-count { color: #57606a; font-size: 13px; }
+.diff-bar-bg { height: 6px; background: #e1e4e8; border-radius: 3px; overflow: hidden; }
 .diff-bar { height: 100%; border-radius: 3px; transition: width 1.2s ease; }
 
 /* ===== Category Layout ===== */
@@ -566,23 +567,23 @@ onUnmounted(() => {
 .category-details { flex: 1; display: flex; flex-direction: column; gap: 14px; }
 
 .tag-group { display: flex; flex-direction: column; gap: 6px; }
-.tag-group-label { font-size: 13px; color: #8b949e; }
+.tag-group-label { font-size: 13px; color: #57606a; }
 .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
 .tag-strong { background: rgba(63,185,80,0.12); color: #3fb950; border: 1px solid rgba(63,185,80,0.25); }
 .tag-weak { background: rgba(248,81,73,0.1); color: #f85149; border: 1px solid rgba(248,81,73,0.2); }
 
 .category-rank { display: flex; flex-direction: column; gap: 8px; }
-.rank-title { font-size: 12px; color: #484f58; margin-bottom: 2px; }
+.rank-title { font-size: 12px; color: #8c959f; margin-bottom: 2px; }
 .rank-item { display: flex; align-items: center; gap: 8px; }
-.rank-no { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #21262d; color: #8b949e; flex-shrink: 0; }
-.rank-1 { background: #d29922; color: #0d1117; }
-.rank-2 { background: #8b949e; color: #0d1117; }
-.rank-3 { background: #c9722c; color: #0d1117; }
-.rank-name { font-size: 13px; color: #c9d1d9; min-width: 60px; }
-.rank-bar-bg { flex: 1; height: 5px; background: #21262d; border-radius: 3px; overflow: hidden; }
-.rank-bar { height: 100%; background: linear-gradient(90deg, #58a6ff, #3fb950); border-radius: 3px; transition: width 1.2s ease; }
-.rank-count { font-size: 12px; color: #8b949e; min-width: 24px; text-align: right; }
+.rank-no { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #e1e4e8; color: #57606a; flex-shrink: 0; }
+.rank-1 { background: #d29922; color: #ffffff; }
+.rank-2 { background: #8c959f; color: #ffffff; }
+.rank-3 { background: #c9722c; color: #ffffff; }
+.rank-name { font-size: 13px; color: #333333; min-width: 60px; }
+.rank-bar-bg { flex: 1; height: 5px; background: #e1e4e8; border-radius: 3px; overflow: hidden; }
+.rank-bar { height: 100%; background: linear-gradient(90deg, #1f6feb, #3fb950); border-radius: 3px; transition: width 1.2s ease; }
+.rank-count { font-size: 12px; color: #57606a; min-width: 24px; text-align: right; }
 
 /* ===== Error Layout ===== */
 .error-layout { display: flex; gap: 24px; align-items: flex-start; }
@@ -591,50 +592,50 @@ onUnmounted(() => {
 
 .error-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .error-stat-item {
-  background: #161b22; border: 1px solid #21262d; border-radius: 10px;
+  background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 10px;
   padding: 14px; text-align: center;
 }
 .error-stat-num { font-size: 28px; font-weight: 700; line-height: 1.1; }
-.error-stat-label { font-size: 11px; color: #8b949e; margin-top: 4px; }
-.error-stat-pct { font-size: 12px; color: #484f58; margin-top: 2px; }
+.error-stat-label { font-size: 11px; color: #57606a; margin-top: 4px; }
+.error-stat-pct { font-size: 12px; color: #8c959f; margin-top: 2px; }
 
 /* ===== Advice Box ===== */
 .advice-box {
   display: flex; align-items: flex-start; gap: 8px;
-  background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.15);
-  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #8b949e; line-height: 1.6;
+  background: rgba(31,111,235,0.06); border: 1px solid rgba(31,111,235,0.15);
+  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #57606a; line-height: 1.6;
 }
 .advice-icon { flex-shrink: 0; font-size: 14px; }
 
 /* ===== Summary Section ===== */
-.summary-text { color: #c9d1d9; font-size: 15px; line-height: 1.9; margin-bottom: 24px; text-align: left; }
+.summary-text { color: #333333; font-size: 15px; line-height: 1.9; margin-bottom: 24px; text-align: left; }
 
 .suggestions {
-  text-align: left; background: rgba(88,166,255,0.04);
-  border: 1px solid #21262d; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;
+  text-align: left; background: rgba(31,111,235,0.04);
+  border: 1px solid #e1e4e8; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;
 }
-.suggestions-title { color: #c9d1d9; font-size: 15px; font-weight: 600; margin: 0 0 12px; }
+.suggestions-title { color: #333333; font-size: 15px; font-weight: 600; margin: 0 0 12px; }
 .suggestions-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-.suggestions-list li { display: flex; align-items: flex-start; gap: 10px; color: #8b949e; font-size: 14px; line-height: 1.6; }
+.suggestions-list li { display: flex; align-items: flex-start; gap: 10px; color: #57606a; font-size: 14px; line-height: 1.6; }
 .suggestion-num {
   flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
-  background: rgba(88,166,255,0.15); color: #58a6ff;
+  background: rgba(31,111,235,0.15); color: #1f6feb;
   display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
 }
 
 .next-goal {
-  background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(63,185,80,0.08));
-  border: 1px solid rgba(88,166,255,0.2); border-radius: 12px;
+  background: linear-gradient(135deg, rgba(31,111,235,0.08), rgba(63,185,80,0.08));
+  border: 1px solid rgba(31,111,235,0.2); border-radius: 12px;
   padding: 16px 20px; margin-bottom: 24px; text-align: left;
 }
-.next-goal-label { font-size: 13px; color: #58a6ff; margin-bottom: 6px; font-weight: 600; }
-.next-goal-text { font-size: 15px; color: #c9d1d9; line-height: 1.6; }
+.next-goal-label { font-size: 13px; color: #1f6feb; margin-bottom: 6px; font-weight: 600; }
+.next-goal-text { font-size: 15px; color: #333333; line-height: 1.6; }
 
 .back-profile-btn {
-  background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+  background: #ffffff; border: 1px solid #d0d7de; color: #333333;
   padding: 10px 28px; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all 0.2s;
 }
-.back-profile-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+.back-profile-btn:hover { border-color: #1f6feb; color: #1f6feb; }
 
 /* ===== Responsive ===== */
 @media (max-width: 700px) {

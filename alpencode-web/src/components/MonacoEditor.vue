@@ -22,20 +22,20 @@ const languageMap: Record<string, string> = {
 onMounted(() => {
   if (!editorRef.value) return;
 
-  // 定义与页面统一的深色主题
-  monaco.editor.defineTheme('alpencode-dark', {
-    base: 'vs-dark',
+  // 定义与页面统一的浅色主题
+  monaco.editor.defineTheme('alpencode-light', {
+    base: 'vs',
     inherit: true,
     rules: [],
     colors: {
-      'editor.background': '#0d1117',
+      'editor.background': '#ffffff',
     },
   });
 
   editor.value = monaco.editor.create(editorRef.value, {
     value: props.modelValue,
     language: languageMap[props.language || 'java'] || 'java',
-    theme: 'alpencode-dark',
+    theme: 'alpencode-light',
     fontSize: 14,
     minimap: { enabled: false },
     automaticLayout: true,

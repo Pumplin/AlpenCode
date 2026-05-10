@@ -378,7 +378,7 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
                     <span>📊 通过率 {{ getAcRate(problem) }}</span>
                   </div>
                   <div class="desc-content">
-                    <MdPreview :model-value="problem.description || ''" theme="dark" />
+                    <MdPreview :model-value="problem.description || ''" theme="light" />
                   </div>
                 </template>
                 <template v-else-if="detailLoading">
@@ -503,7 +503,7 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
                       <!-- AI 分析 -->
                       <template v-if="bottomTab === 'ai'">
                         <div v-if="aiAnalysis" class="ai-content">
-                          <MdPreview :model-value="aiAnalysis" theme="dark" />
+                          <MdPreview :model-value="aiAnalysis" theme="light" />
                         </div>
                         <div v-else-if="aiLoading" class="result-empty">AI 正在分析中...</div>
                         <div v-else class="result-empty">提交代码后，AI 将自动分析</div>
@@ -555,24 +555,24 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
 
 <style scoped>
 /* ===== 根布局 ===== */
-.ide-root { height: 100vh; display: flex; flex-direction: column; background: #0d1117; color: #c9d1d9; overflow: hidden; }
+.ide-root { height: 100vh; display: flex; flex-direction: column; background: #ffffff; color: #333333; overflow: hidden; }
 
 /* ===== 顶栏 ===== */
 .ide-header {
   height: 48px; min-height: 48px;
-  background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
-  border-bottom: 1px solid #21262d;
+  background: #ffffff;
+  border-bottom: 1px solid #e1e4e8;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; gap: 12px; z-index: 10;
 }
 .ide-header-left, .ide-header-right { display: flex; align-items: center; gap: 8px; }
 .ide-header-center { flex: 1; text-align: center; }
-.current-problem-title { color: #8b949e; font-size: 13px; }
+.current-problem-title { color: #57606a; font-size: 13px; }
 .logo { display: flex; align-items: center; gap: 6px; cursor: pointer; }
 .logo-icon { font-size: 20px; }
-.logo-text { font-size: 16px; font-weight: 700; color: #58a6ff; letter-spacing: 0.5px; }
-.header-divider { width: 1px; height: 20px; background: #30363d; margin: 0 4px; }
-.user-name { color: #8b949e; font-size: 13px; }
+.logo-text { font-size: 16px; font-weight: 700; color: #1f6feb; letter-spacing: 0.5px; }
+.header-divider { width: 1px; height: 20px; background: #d0d7de; margin: 0 4px; }
+.user-name { color: #57606a; font-size: 13px; }
 
 /* ===== 按钮 ===== */
 .btn {
@@ -587,22 +587,22 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
   animation: spin 0.6s linear infinite; display: inline-block; flex-shrink: 0;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.btn-run { background: #21262d; color: #3fb950; border: 1px solid #3fb95044; }
+.btn-run { background: #f6f8fa; color: #3fb950; border: 1px solid #3fb95044; }
 .btn-run:hover { background: #3fb95018; }
 .btn-run:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-submit { background: #1f6feb; color: #fff; }
 .btn-submit:hover { background: #388bfd; }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-ghost { background: transparent; color: #8b949e; }
-.btn-ghost:hover { color: #c9d1d9; }
+.btn-ghost { background: transparent; color: #57606a; }
+.btn-ghost:hover { color: #333333; }
 .btn-primary-sm { background: #1f6feb; color: #fff; padding: 4px 12px; border-radius: 4px; }
 .lang-select {
-  background: #21262d; color: #c9d1d9; border: 1px solid #30363d;
+  background: #ffffff; color: #333333; border: 1px solid #d0d7de;
   border-radius: 6px; padding: 4px 8px; font-size: 13px; outline: none; cursor: pointer;
 }
 
 /* ===== 主体 ===== */
-.ide-body { flex: 1; overflow: hidden; padding: 6px; background: #010409; }
+.ide-body { flex: 1; overflow: hidden; padding: 6px; background: #f6f8fa; }
 
 /* ===== Splitpanes 间距 + 圆角面板 ===== */
 :deep(.splitpanes__splitter) {
@@ -623,20 +623,20 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
 }
 
 /* ===== 左侧边栏 ===== */
-.sidebar { height: 100%; background: #0d1117; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; }
+.sidebar { height: 100%; background: #ffffff; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; border: 1px solid #e1e4e8; }
 
 .sidebar-search { padding: 8px; }
 .search-input {
-  width: 100%; padding: 6px 10px; background: #161b22; border: 1px solid #30363d;
-  border-radius: 6px; color: #c9d1d9; font-size: 13px; outline: none;
+  width: 100%; padding: 6px 10px; background: #ffffff; border: 1px solid #d0d7de;
+  border-radius: 6px; color: #333333; font-size: 13px; outline: none;
 }
-.search-input:focus { border-color: #58a6ff; }
-.search-input::placeholder { color: #484f58; }
+.search-input:focus { border-color: #1f6feb; }
+.search-input::placeholder { color: #8c959f; }
 
 .sidebar-filters { display: flex; gap: 4px; padding: 0 8px 8px; }
 .filter-select {
-  flex: 1; padding: 4px 6px; background: #161b22; border: 1px solid #30363d;
-  border-radius: 4px; color: #c9d1d9; font-size: 12px; outline: none; cursor: pointer;
+  flex: 1; padding: 4px 6px; background: #ffffff; border: 1px solid #d0d7de;
+  border-radius: 4px; color: #333333; font-size: 12px; outline: none; cursor: pointer;
 }
 
 .problem-list { flex: 1; overflow-y: auto; }
@@ -645,95 +645,95 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
   cursor: pointer; border-left: 3px solid transparent; transition: all 0.1s;
   font-size: 13px;
 }
-.problem-item:hover { background: #161b22; }
-.problem-item.selected { background: #1f6feb15; border-left-color: #58a6ff; }
-.problem-id { color: #484f58; font-size: 12px; min-width: 28px; }
-.problem-title-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c9d1d9; }
+.problem-item:hover { background: #f6f8fa; }
+.problem-item.selected { background: #ddf4ff; border-left-color: #1f6feb; }
+.problem-id { color: #8c959f; font-size: 12px; min-width: 28px; }
+.problem-title-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #333333; }
 .problem-diff { font-size: 11px; font-weight: 600; white-space: nowrap; }
 
-.sidebar-loading, .sidebar-empty { padding: 24px; text-align: center; color: #484f58; font-size: 13px; }
+.sidebar-loading, .sidebar-empty { padding: 24px; text-align: center; color: #8c959f; font-size: 13px; }
 
 /* ===== 题目描述面板 ===== */
-.desc-panel { height: 100%; overflow-y: auto; padding: 20px; background: #0d1117; border-radius: 8px; }
+.desc-panel { height: 100%; overflow-y: auto; padding: 20px; background: #ffffff; border-radius: 8px; border: 1px solid #e1e4e8; }
 .desc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.desc-title { font-size: 18px; font-weight: 700; color: #e6edf3; margin: 0; }
+.desc-title { font-size: 18px; font-weight: 700; color: #1f2328; margin: 0; }
 .diff-badge { padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-.desc-meta { display: flex; gap: 16px; font-size: 12px; color: #8b949e; margin-bottom: 16px; }
+.desc-meta { display: flex; gap: 16px; font-size: 12px; color: #57606a; margin-bottom: 16px; }
 .desc-content { font-size: 14px; line-height: 1.7; }
 
 .panel-placeholder {
   height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  color: #30363d;
+  color: #d0d7de;
 }
 .placeholder-icon { font-size: 64px; margin-bottom: 16px; }
-.placeholder-text { font-size: 15px; color: #484f58; }
+.placeholder-text { font-size: 15px; color: #8c959f; }
 
 /* ===== 编辑器面板 ===== */
-.editor-panel { height: 100%; background: #0d1117; border-radius: 8px; overflow: hidden; }
+.editor-panel { height: 100%; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e1e4e8; }
 
 .btn-icon-only { padding: 5px 7px; }
 .btn-icon-only svg { display: block; }
 
 /* ===== 结果面板 ===== */
-.result-panel { height: 100%; display: flex; flex-direction: column; background: #0d1117; border-radius: 8px; overflow: hidden; }
-.result-tabs { display: flex; align-items: center; border-bottom: 1px solid #21262d; padding: 0 8px; }
+.result-panel { height: 100%; display: flex; flex-direction: column; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e1e4e8; }
+.result-tabs { display: flex; align-items: center; border-bottom: 1px solid #e1e4e8; padding: 0 8px; }
 .rtab {
   padding: 8px 14px; font-size: 13px; background: transparent; border: none;
-  color: #8b949e; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
+  color: #57606a; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
 }
-.rtab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
-.rtab:hover { color: #c9d1d9; }
+.rtab.active { color: #1f6feb; border-bottom-color: #1f6feb; }
+.rtab:hover { color: #333333; }
 .close-btn { margin-left: auto; font-size: 14px; padding: 8px 10px; }
 .loading-dot { color: #1f6feb; animation: blink 1s infinite; margin-left: 4px; font-size: 10px; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 .result-body { flex: 1; overflow-y: auto; padding: 12px 16px; font-size: 13px; }
-.result-empty { color: #484f58; padding: 20px; text-align: center; }
+.result-empty { color: #8c959f; padding: 20px; text-align: center; }
 
-.run-case { padding: 8px 12px; background: #161b22; border-radius: 6px; margin-bottom: 8px; }
+.run-case { padding: 8px 12px; background: #f6f8fa; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e1e4e8; }
 .case-badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
 .case-error { color: #f85149; margin-top: 6px; white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 12px; }
 .case-detail { margin-top: 6px; font-family: 'Consolas', monospace; }
-.case-detail .label { color: #8b949e; }
-.case-detail code { color: #e6edf3; }
+.case-detail .label { color: #57606a; }
+.case-detail code { color: #1f2328; }
 
 .submit-result-box { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
 .submit-status { font-size: 20px; font-weight: 700; }
-.submit-msg { color: #8b949e; font-size: 13px; }
+.submit-msg { color: #57606a; font-size: 13px; }
 
 .ai-content { font-size: 14px; line-height: 1.6; }
 .ai-content :deep(.md-editor-preview-wrapper) { padding: 0; }
-.ai-content :deep(pre) { background: #161b22 !important; border-radius: 6px; }
+.ai-content :deep(pre) { background: #f6f8fa !important; border-radius: 6px; border: 1px solid #e1e4e8; }
 
 /* ===== 左侧标题栏 ===== */
-.sidebar-header { padding: 10px 12px; border-bottom: 1px solid #21262d; }
-.sidebar-title { font-size: 13px; font-weight: 600; color: #c9d1d9; }
+.sidebar-header { padding: 10px 12px; border-bottom: 1px solid #e1e4e8; }
+.sidebar-title { font-size: 13px; font-weight: 600; color: #333333; }
 
 /* ===== 历史记录 ===== */
 .history-item {
-  padding: 10px 12px; border-bottom: 1px solid #21262d; cursor: pointer;
+  padding: 10px 12px; border-bottom: 1px solid #e1e4e8; cursor: pointer;
   transition: background 0.1s; border-left: 3px solid transparent;
 }
-.history-item:hover { background: #161b22; }
-.history-item.active { background: #1f6feb15; border-left-color: #58a6ff; }
+.history-item:hover { background: #f6f8fa; }
+.history-item.active { background: #ddf4ff; border-left-color: #1f6feb; }
 .history-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .history-result { font-weight: 600; font-size: 13px; }
 .history-ai-badge { font-size: 12px; cursor: default; }
-.history-lang { color: #8b949e; font-size: 12px; }
-.history-time { color: #484f58; font-size: 12px; margin-left: auto; }
-.history-bottom { display: flex; gap: 12px; color: #484f58; font-size: 12px; }
+.history-lang { color: #57606a; font-size: 12px; }
+.history-time { color: #8c959f; font-size: 12px; margin-left: auto; }
+.history-bottom { display: flex; gap: 12px; color: #8c959f; font-size: 12px; }
 
 /* ===== 查看历史提示条 ===== */
 .viewing-banner {
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 12px; margin-bottom: 8px;
-  background: #1f6feb18; border: 1px solid #1f6feb44; border-radius: 6px;
-  font-size: 13px; color: #58a6ff;
+  background: #ddf4ff; border: 1px solid #54aeff; border-radius: 6px;
+  font-size: 13px; color: #0969da;
 }
 .btn-back {
-  background: #21262d; color: #c9d1d9; border: 1px solid #30363d;
+  background: #ffffff; color: #333333; border: 1px solid #d0d7de;
   border-radius: 4px; padding: 3px 10px; font-size: 12px; cursor: pointer;
   transition: all 0.15s;
 }
-.btn-back:hover { background: #30363d; }
+.btn-back:hover { background: #f6f8fa; }
 </style>
