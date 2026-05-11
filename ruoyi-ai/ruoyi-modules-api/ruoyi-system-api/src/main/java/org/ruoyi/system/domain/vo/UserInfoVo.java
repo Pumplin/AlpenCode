@@ -27,4 +27,9 @@ public class UserInfoVo {
      */
     private Set<String> roles;
 
+    /**
+     * 用户首页路径
+     */
+    private String homePath;
+
 }

@@ -383,7 +383,7 @@ const handleBlur = (item: any, value: string) => {
   </div>
 </template>
 
-<style lang="less" scoped>
+<style scoped>
 .configuration-manage {
   padding: 10px;
   height: 100%;

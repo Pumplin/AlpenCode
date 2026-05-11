@@ -35,6 +35,7 @@ export interface UserInfoResp {
   permissions: string[];
   roles: string[];
   user: User;
+  homePath?: string;
 }
 
 /**

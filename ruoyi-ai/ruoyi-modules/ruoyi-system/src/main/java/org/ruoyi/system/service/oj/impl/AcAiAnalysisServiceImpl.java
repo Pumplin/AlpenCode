@@ -83,7 +83,12 @@ public class AcAiAnalysisServiceImpl implements IAcAiAnalysisService {
                 ```%s
                 %s
                 ```
-                请分析代码的时间和空间复杂度，并给出优化建议。如果有更优的解法思路，请简要说明。用中文回答。
+                请分析代码的时间和空间复杂度，并给出优化建议。如果有更优的解法思路，请简要说明。
+                
+                要求：
+                1. 用中文回答
+                2. 使用标准 Markdown 格式，标题符号（#）后必须有空格
+                3. 代码块使用三个反引号包裹，并指定语言
                 """,
                 problem.getDescription(),
                 submit.getLanguage(),
@@ -103,7 +108,12 @@ public class AcAiAnalysisServiceImpl implements IAcAiAnalysisService {
                 编程语言：%s
                 判题结果：%s
                 错误信息：%s
-                请分析错误原因，给出具体的修复思路。用中文回答，语言简洁易懂。
+                请分析错误原因，给出具体的修复思路。
+                
+                要求：
+                1. 用中文回答，语言简洁易懂
+                2. 使用标准 Markdown 格式，标题符号（#）后必须有空格
+                3. 代码块使用三个反引号包裹，并指定语言
                 """,
                 problem.getDescription(),
                 submit.getLanguage(),

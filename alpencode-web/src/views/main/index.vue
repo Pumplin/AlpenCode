@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { Splitpanes, Pane } from 'splitpanes';
 import 'splitpanes/dist/splitpanes.css';
@@ -128,6 +128,27 @@ const bottomTab = ref('result');
 const aiAnalysis = ref('');
 const aiLoading = ref(false);
 const editorFullscreen = ref(false);
+const aiRenderKey = ref(0); // 用于强制刷新 MdPreview 组件
+
+// 修复 Markdown 格式：确保各种语法正确
+function fixMarkdownFormat(text: string): string {
+  if (!text) return '';
+  
+  return text
+    // 修复标题：# 后面没有空格的情况（行首）
+    .replace(/^(#{1,6})([^\s#])/gm, '$1 $2')
+    // 修复无序列表：- 或 * 后面没有空格（行首，且后面不是 * 表示粗体）
+    .replace(/^([-])([^\s-])/gm, '$1 $2')
+    // 修复有序列表：1. 后面没有空格（行首）
+    .replace(/^(\d+\.)([^\s])/gm, '$1 $2')
+    // 注意：不处理行首的 * 列表，因为可能与粗体冲突
+    // 如果确实需要，可以添加更精确的正则
+    // 修复代码块：``` 后面的语言标识
+    .replace(/```(\w+)([^\n])/g, '```$1\n$2');
+}
+
+// 计算属性：返回格式化后的 AI 分析内容
+const aiAnalysisFormatted = computed(() => fixMarkdownFormat(aiAnalysis.value));
 
 function toggleFullscreen() {
   if (!document.fullscreenElement) {
@@ -138,13 +159,37 @@ function toggleFullscreen() {
 }
 let closeAiStream: (() => void) | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
+let aiRenderThrottle: ReturnType<typeof setTimeout> | null = null;
 
 function startAiAnalysis(submitId: number) {
-  aiAnalysis.value = ''; aiLoading.value = true; bottomTab.value = 'ai';
+  aiAnalysis.value = ''; aiLoading.value = true; bottomTab.value = 'ai'; aiRenderKey.value++;
   closeAiStream = createAiAnalysisStream(submitId,
-    (token) => { aiAnalysis.value += token; },
-    () => { aiLoading.value = false; },
-    () => { aiLoading.value = false; if (!aiAnalysis.value) aiAnalysis.value = 'AI 分析暂时不可用'; },
+    (token) => { 
+      aiAnalysis.value += token;
+      // 节流更新渲染 key，避免过于频繁的重渲染
+      if (!aiRenderThrottle) {
+        aiRenderThrottle = setTimeout(() => {
+          aiRenderKey.value++;
+          aiRenderThrottle = null;
+        }, 200); // 200ms 节流
+      }
+    },
+    () => { 
+      aiLoading.value = false;
+      aiRenderKey.value++; // 完成时最后刷新一次
+      if (aiRenderThrottle) {
+        clearTimeout(aiRenderThrottle);
+        aiRenderThrottle = null;
+      }
+    },
+    () => { 
+      aiLoading.value = false; 
+      if (!aiAnalysis.value) aiAnalysis.value = 'AI 分析暂时不可用';
+      if (aiRenderThrottle) {
+        clearTimeout(aiRenderThrottle);
+        aiRenderThrottle = null;
+      }
+    },
   );
 }
 
@@ -266,7 +311,11 @@ onMounted(() => {
     editorFullscreen.value = !!document.fullscreenElement;
   });
 });
-onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStream) closeAiStream(); });
+onBeforeUnmount(() => { 
+  if (pollTimer) clearInterval(pollTimer); 
+  if (closeAiStream) closeAiStream();
+  if (aiRenderThrottle) clearTimeout(aiRenderThrottle);
+});
 </script>
 
 <template>
@@ -502,8 +551,14 @@ onBeforeUnmount(() => { if (pollTimer) clearInterval(pollTimer); if (closeAiStre
                       </template>
                       <!-- AI 分析 -->
                       <template v-if="bottomTab === 'ai'">
-                        <div v-if="aiAnalysis" class="ai-content">
-                          <MdPreview :model-value="aiAnalysis" theme="light" />
+                        <div v-if="aiAnalysisFormatted" class="ai-content">
+                          <MdPreview 
+                            :key="aiRenderKey"
+                            :model-value="aiAnalysisFormatted" 
+                            theme="light" 
+                            editor-id="ai-analysis-preview"
+                            :show-code-row-number="true"
+                          />
                         </div>
                         <div v-else-if="aiLoading" class="result-empty">AI 正在分析中...</div>
                         <div v-else class="result-empty">提交代码后，AI 将自动分析</div>

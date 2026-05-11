@@ -132,6 +132,8 @@ public class SysUserController extends BaseController {
         userInfoVo.setUser(user);
         userInfoVo.setPermissions(loginUser.getMenuPermission());
         userInfoVo.setRoles(loginUser.getRolePermission());
+        // 设置默认首页为题库管理页面
+        userInfoVo.setHomePath("/oj/problem");
         return R.ok(userInfoVo);
     }
 
